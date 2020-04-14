@@ -1,0 +1,38 @@
+nav {
+    padding:$gutter-width;
+    button {
+        padding:.5em 1.5em;
+        margin-right:.5em;
+        border-radius:3px;
+        border:none;
+        background:$dark-green;
+        color:$yellow;
+        &:hover {
+            background:$light-green;
+        }
+    }
+    .radio-chooser {
+        display: inline-block;
+        text-align: center;
+        p {
+            display:inline-block;
+        }
+        .radio-option {
+            display:inline-block;
+            input[type="radio"] {
+                display:none;
+                &:checked {
+                    +label {
+                        font-weight:bold;
+                    }
+                }
+            }
+            label {
+                text-transform:uppercase;
+                font-size:1em;
+                margin:0 1em;
+                cursor:pointer;
+            }
+        }
+    }
+}

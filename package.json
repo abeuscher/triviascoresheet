@@ -1,0 +1,15 @@
+{
+  "name": "teamtrivia.app",
+  "version": "1.0.0",
+  "description": "For keeping score in trivia",
+  "author": "Al Beuscher <alexbeuscher@gmail.com>",
+  "main": "dist/index.js",
+  "scripts": {
+    "startclient": "gulp --cwd ./appclient",
+    "resetserver": "docker-compose restart",
+    "startapp": "docker-compose up -d && yarn startclient"
+  },
+  "dependencies" : {
+    "mongoose" : "5.9.2"
+  }
+}

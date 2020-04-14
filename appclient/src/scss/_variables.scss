@@ -1,0 +1,32 @@
+$bps:(xs: 0, s:640px, m:1024px, l:1320px);
+
+//config
+$cdn-path:"/";
+$img-path:$cdn-path+"images/";
+$font-path:"/fonts/";
+
+//colors
+$black:#000;
+$white:#fff;
+$off-white:#d2dce6;
+$off-black:#031921;
+
+$dark-green:#2f7d35;
+$sea-green:#2c7873;
+$light-green:#6fb98f;
+$yellow:#ffd800;
+
+$body-bg-color:linear-gradient(to bottom, rgb(114, 172, 143) 0%, rgb(171, 202, 153) 63%, rgb(216, 219, 166) 83%, rgb(240, 228, 172) 100%);
+
+$body-text-color:$off-black;
+$body-link-color:$black;
+$body-link-hover-color:$off-black;
+
+//fonts
+$body-font:'Montserrat',sans-serif;
+$nav-font:'Raleway',sans-serif;
+$header-font:'Raleway', sans-serif;
+$logo-font:'Raleway', sans-serif;
+$header-font-size:1.4em;
+
+$gutter-width:50px;

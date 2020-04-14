@@ -1,0 +1,95 @@
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 90%;
+    background: transparent;
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+    }
+    &:focus {
+      outline: none;
+    }
+    &::-ms-track {
+      width: 90%;
+      cursor: pointer;
+      background: transparent;
+      border-color: transparent;
+      color: transparent;
+    }
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      border: 1px solid $black;
+      height: 36px;
+      width: 16px;
+      border-radius: 3px;
+      background: $white;
+      cursor: pointer;
+      margin-top: -14px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+      box-shadow: 1px 1px 1px $black, 0px 0px 1px $off-black; /* Add cool effects to your sliders! */
+    }
+    &::-moz-range-thumb {
+      box-shadow: 1px 1px 1px $black, 0px 0px 1px $off-black;
+      border: 1px solid $black;
+      height: 36px;
+      width: 16px;
+      border-radius: 3px;
+      background: $white;
+      cursor: pointer;
+    }
+    &::-ms-thumb {
+      box-shadow: 1px 1px 1px $black, 0px 0px 1px $off-black;
+      border: 1px solid $black;
+      height: 36px;
+      width: 16px;
+      border-radius: 3px;
+      background: $white;
+      cursor: pointer;
+    }
+    &::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      box-shadow: 1px 1px 1px $black, 0px 0px 1px $off-black;
+      background: $light-green;
+      border-radius: 1.3px;
+      border: 0.2px solid darken($off-black, 5%);
+    }
+    &:focus::-webkit-slider-runnable-track {
+      background: $dark-green;
+    }
+    &::-moz-range-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      box-shadow: 1px 1px 1px $black, 0px 0px 1px $off-black;
+      background: $light-green;
+      border-radius: 1.3px;
+      border: 0.2px solid darken($off-black, 5%);
+    }
+    &::-ms-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      background: transparent;
+      border-color: transparent;
+      border-width: 16px 0;
+      color: transparent;
+    }
+    &::-ms-fill-lower {
+      background: #2a6495;
+      border: 0.2px solid darken($off-black, 5%);
+      border-radius: 2.6px;
+      box-shadow: 1px 1px 1px $black, 0px 0px 1px $off-black;
+    }
+    &:focus::-ms-fill-lower {
+      background: $light-green;
+    }
+    &::-ms-fill-upper {
+      background: $light-green;
+      border: 0.2px solid darken($off-black, 5%);
+      border-radius: 2.6px;
+      box-shadow: 1px 1px 1px $black, 0px 0px 1px $off-black;
+    }
+    &:focus::-ms-fill-upper {
+      background: $dark-green;
+    }
+  }
