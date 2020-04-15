@@ -29,7 +29,7 @@ let corsOptions = {
     optionsSuccessStatus: 200
 }
 
-mongoose.connect(CONNECTION_URL,{ useNewUrlParser: true });
+mongoose.connect(CONNECTION_URL, { useNewUrlParser: true });
 
 app.listen(5000, () => {
     const schemas = [];
@@ -46,18 +46,18 @@ app.listen(5000, () => {
         if (request.body.id) {
             try {
                 var result = await Entry.findById(request.body.id).exec();
-                response.send(result ? result : {error:"not found"});
+                response.send(result ? result : { error: "not found" });
             } catch (error) {
                 response.status(500).send(error);
-            }            
+            }
         }
         else {
             try {
                 var result = await Entry.find().exec();
-                response.send(result ? result : {error:"not found"});
+                response.send(result ? result : { error: "not found" });
             } catch (error) {
                 response.status(500).send(error);
-            }   
+            }
         }
 
 
@@ -69,7 +69,7 @@ app.listen(5000, () => {
         let Entry = models[request.params.type];
 
         try {
-            let dbReq = await Entry.findById(request.body.id).exec();        
+            let dbReq = await Entry.findById(request.body.id).exec();
             dbReq.set(request.body);
             let result = await dbReq.save();
             response.send(result);
@@ -89,38 +89,26 @@ app.listen(5000, () => {
     });
     app.post('/create/:type', (request, response) => {
 
-        if (request.params.type == "image") {
-            upload(request, response, function (err) {
-                if (err instanceof multer.MulterError) {
-                    return response.status(500).json(err)
-                } else if (err) {
-                    return response.status(500).json(err)
-                }
-                return response.status(200).send(request.files)
-            });
-        }
-        else {
-            let newData = new models[request.params.type](request.body);
-            //response.send(models[request.params.type]);
+        let newData = new models[request.params.type](request.body);
+        //response.send(models[request.params.type]);
 
-            newData.save(function (err, data) {
-                if (err) {
-                    response.send(err);
-                }
-                else {
-                    response.json(data);
-                }
+        newData.save(function (err, data) {
+            if (err) {
+                response.send(err);
+            }
+            else {
+                response.json(data);
+            }
 
-            });
+        });
 
-        }
     });
 });
 function fixSchemas(schema) {
     var output = {};
     Object.keys(schema).map(key => {
-        if (typeof schema[key]=='object') {
-            output[key]=fixSchemas(schema[key]);
+        if (typeof schema[key] == 'object') {
+            output[key] = fixSchemas(schema[key]);
         }
         else {
             output[key] == schema[key] == "_id" ? mongoose.Schema.Types.ObjectId : schema[key]

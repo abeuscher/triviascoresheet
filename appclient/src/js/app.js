@@ -43,4 +43,4 @@ class App extends Component {
         `
     }
 }
-ReactDOM.render(<App key="main-app" />, document.getElementById('weed-form'));
+ReactDOM.render(<App />, document.getElementById('player-app'));

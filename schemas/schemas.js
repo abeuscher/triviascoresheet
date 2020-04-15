@@ -51,38 +51,40 @@ function AppSchemas() {
                 type: String,
                 default: "Strain Name"
             },
+            game_codes: [{
+                code: {
+                    type: String
+                }
+            }],
             num_questions: {
                 type: Number,
                 min: 1,
                 max: 20,
                 default: 20
             },
-            questions: [{
-                ref: "question",
-                type: mongoose.Schema.Types.ObjectId
-            }],
+            current_question: {
+                type: Number,
+                min: 1,
+                max: 20,
+                default: 0
+            },
+            game_title: {
+                type: String
+            },
+            game_details: {
+                type: String
+            },
             teams: [{
-                ref:"team",
-                type: mongoose.Schema.Types.ObjectId
+                team: {
+                    ref: "team",
+                    type: mongoose.Schema.Types.ObjectId
+                },
+                score: {
+                    type: Number,
+                    min: 1,
+                    default: 0
+                }
             }],
-            created: {
-                type: Date,
-                default: Date.now
-            }
-        },
-        "question": {
-            title: {
-                type: String,
-                default: "Manufacturer / Distributor Name"
-            },
-            business_type: {
-                type: String,
-                default: "choices:['farm','distributor']"
-            },
-            website: {
-                type: String,
-                default: "http://example.com/"
-            },
             created: {
                 type: Date,
                 default: Date.now
