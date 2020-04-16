@@ -28,6 +28,9 @@ function AppSchemas() {
                 type: String,
                 default: "BLANK"
             },
+            bid_amount: {
+                type: Number
+            },
             created: {
                 type: Date,
                 default: Date.now
@@ -46,16 +49,25 @@ function AppSchemas() {
                 default: Date.now
             }
         },
+        "game_token": {
+            game_id : {
+                ref:"game",
+                type: mongoose.Schema.Types.ObjectId
+            },
+            token: {
+                type:String,
+                unique:true
+            },
+            created: {
+                type: Date,
+                default: Date.now
+            }       
+        },
         "game": {
             start_time: {
                 type: String,
                 default: "Strain Name"
             },
-            game_codes: [{
-                code: {
-                    type: String
-                }
-            }],
             num_questions: {
                 type: Number,
                 min: 1,
@@ -64,14 +76,14 @@ function AppSchemas() {
             },
             current_question: {
                 type: Number,
-                min: 1,
+                min: 0,
                 max: 20,
                 default: 0
             },
             game_title: {
                 type: String
             },
-            game_details: {
+            game_description: {
                 type: String
             },
             teams: [{

@@ -2,18 +2,7 @@ const Express = require("express");
 const BodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const multer = require('multer');
 
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads')
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.originalname)
-    }
-});
-
-const upload = multer({ storage: storage }).array('file')
 
 const CONNECTION_URL = "mongodb://mongodb/local";
 const DataTypes = require("../schemas/schemas.js")();
@@ -34,11 +23,17 @@ mongoose.connect(CONNECTION_URL, { useNewUrlParser: true });
 app.listen(5000, () => {
     const schemas = [];
     const models = [];
+
+
     Object.keys(DataTypes).map(key => {
+        console.log(key);
         schemas[key] = new mongoose.Schema(DataTypes[key]);
         models[key] = mongoose.model(key, schemas[key]);
     });
-    app.use("/uploads", Express.static('uploads'));
+
+    app.get('/', cors(corsOptions), async (request, response) => {
+        response.send("ok dokey fenokey");
+    })
 
     app.post('/get/:type', cors(corsOptions), async (request, response) => {
 
@@ -60,8 +55,6 @@ app.listen(5000, () => {
             }
         }
 
-
-
     });
 
     app.post('/update/:type', cors(corsOptions), async (request, response) => {
@@ -69,7 +62,7 @@ app.listen(5000, () => {
         let Entry = models[request.params.type];
 
         try {
-            let dbReq = await Entry.findById(request.body.id).exec();
+            let dbReq = await Entry.findById(request.body._id).exec();
             dbReq.set(request.body);
             let result = await dbReq.save();
             response.send(result);
@@ -78,6 +71,7 @@ app.listen(5000, () => {
         }
 
     });
+
     app.post("/delete/:type", async (request, response) => {
         let Entry = models[request.params.type];
         try {
@@ -87,32 +81,18 @@ app.listen(5000, () => {
             response.status(500).send(error);
         }
     });
-    app.post('/create/:type', (request, response) => {
 
-        let newData = new models[request.params.type](request.body);
-        //response.send(models[request.params.type]);
-
-        newData.save(function (err, data) {
-            if (err) {
-                response.send(err);
-            }
-            else {
-                response.json(data);
-            }
-
-        });
-
+    app.post('/create/:type',(request, response) => {
+            let newData = new models[request.params.type](request.body);
+            newData.save(function (err, data) {
+                if (err) {
+                    response.send(err)
+                }
+                else {
+                    console.log("Record ID:",data._id)
+                    response.json(data)
+                }
+            });          
     });
+
 });
-function fixSchemas(schema) {
-    var output = {};
-    Object.keys(schema).map(key => {
-        if (typeof schema[key] == 'object') {
-            output[key] = fixSchemas(schema[key]);
-        }
-        else {
-            output[key] == schema[key] == "_id" ? mongoose.Schema.Types.ObjectId : schema[key]
-        }
-    })
-    return output;
-}

@@ -16,8 +16,7 @@ class DateInput extends React.Component {
                     key='datefield-'+this.props.id,
                     selected=this.props.selected,
                     value=this.props.value,
-                    onChange=this.props.onChange,
-                    data-parent=this.props.parent
+                    onChange=this.props.onChange
                     )`
     }
 }
