@@ -1,8 +1,3 @@
-# Next.js and MongoDB Rest API
+# Trivia Scoresheet
 
-Approach:
-
- 1. Create Schema for an entry
- 2. Push schema to DB
- 3. Bind Schema to form
- 4. Add validation <- Not done
+Work in progress. Using Docker, Next, and Mongoose with Mongo DB.
