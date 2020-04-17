@@ -8,9 +8,9 @@ export default class IntroForm extends Component {
     render() {
         return pug`
             form(method="post")
-            h2="Game Title : " + this.props.game_title
+            h2=this.props.game.game_title
             p Please Enter Your Team Name:
-            input(type="text",name="teamName",value=this.props.teamName,onChange=this.props.onChange)
+            input(type="text",name="team_name",value=this.props.game.team_name,onChange=this.props.onChange)
             input(type="button",value="Submit",onClick=this.props.onSubmit)
         `
     }
