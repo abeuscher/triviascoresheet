@@ -35,64 +35,104 @@ app.listen(5000, () => {
         response.send("ok dokey fenokey");
     })
 
-    app.post('/get/:type', cors(corsOptions), async (request, response) => {
+    app.post('/addteam', cors(corsOptions), async (request, response) => {
+        let Entry = models["game"];
+        let dupe = false
 
-        let Entry = models[request.params.type];
-        if (request.body.id) {
-            try {
-                var result = await Entry.findById(request.body.id).exec();
-                response.send(result ? result : { error: "not found" });
-            } catch (error) {
-                response.status(500).send(error);
+        try {
+            let checkforteam = await Entry.findOne({ "teams.team": request.body.team_name }).exec()
+
+            if (typeof checkforteam._id != "undefined") {
+                if (checkforteam._id == request.body.id) {
+                    response.json({ dupecheck: true })
+                    dupe = true
+                }
             }
+        }
+        catch (e) {
+            try {
+                let result = await Entry.findById(request.body.id).exec()
+                result.teams.push({
+                    team: request.body.team_name,
+                    score: 0
+                })
+                await result.save()
+                response.json({ game: result })
+                console.log("Successfully added team", request.body.team_name)
+            }
+            catch (e) {
+                response.json({ res: "Error on team add", msg: e })
+                console.log("ERROR ON ADD TEAM:", e)
+            }
+        }
+    })
+
+app.post('/get/:type', cors(corsOptions), async (request, response) => {
+
+    let Entry = models[request.params.type];
+    if (request.body.game_code) {
+        try {
+            var result = await Entry.find({ game_code: request.body.game_code }).exec();
+            response.send(result ? result : { error: "not found" });
+        } catch (error) {
+            response.status(500).send(error);
+        }
+    }
+    else if (request.body.id) {
+        try {
+            var result = await Entry.findById(request.body.id).exec();
+            response.send(result ? result : { error: "not found" });
+        } catch (error) {
+            response.status(500).send(error);
+        }
+    }
+    else {
+        try {
+            var result = await Entry.find().exec();
+            response.send(result ? result : { error: "not found" });
+        } catch (error) {
+            response.status(500).send(error);
+        }
+    }
+
+});
+
+app.post('/update/:type', cors(corsOptions), async (request, response) => {
+
+    let Entry = models[request.params.type];
+
+    try {
+        let dbReq = await Entry.findById(request.body._id).exec();
+        dbReq.set(request.body);
+        let result = await dbReq.save();
+        response.send(result);
+    } catch (error) {
+        response.status(500).send(error);
+    }
+
+});
+
+app.post("/delete/:type", async (request, response) => {
+    let Entry = models[request.params.type];
+    try {
+        var result = await Entry.deleteOne({ _id: request.body.id }).exec();
+        response.send(result);
+    } catch (error) {
+        response.status(500).send(error);
+    }
+});
+
+app.post('/create/:type', (request, response) => {
+    let newData = new models[request.params.type](request.body);
+    newData.save(function (err, data) {
+        if (err) {
+            response.send(err)
         }
         else {
-            try {
-                var result = await Entry.find().exec();
-                response.send(result ? result : { error: "not found" });
-            } catch (error) {
-                response.status(500).send(error);
-            }
-        }
-
-    });
-
-    app.post('/update/:type', cors(corsOptions), async (request, response) => {
-
-        let Entry = models[request.params.type];
-
-        try {
-            let dbReq = await Entry.findById(request.body._id).exec();
-            dbReq.set(request.body);
-            let result = await dbReq.save();
-            response.send(result);
-        } catch (error) {
-            response.status(500).send(error);
-        }
-
-    });
-
-    app.post("/delete/:type", async (request, response) => {
-        let Entry = models[request.params.type];
-        try {
-            var result = await Entry.deleteOne({ _id: request.body.id }).exec();
-            response.send(result);
-        } catch (error) {
-            response.status(500).send(error);
+            console.log("Record ID:", data._id)
+            response.json(data)
         }
     });
-
-    app.post('/create/:type',(request, response) => {
-            let newData = new models[request.params.type](request.body);
-            newData.save(function (err, data) {
-                if (err) {
-                    response.send(err)
-                }
-                else {
-                    console.log("Record ID:",data._id)
-                    response.json(data)
-                }
-            });          
-    });
+});
 
 });

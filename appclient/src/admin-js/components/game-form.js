@@ -13,11 +13,11 @@ export default class GameForm extends Component {
 
     render() {
         return pug`
-            if this.props.mode=="create"
-                h3 Create New Game:
-            else 
-                h3="Edit Record id#"+this.props.game_details._id
             form(method="post")
+                if this.props.mode=="create"
+                    h3 Create New Game:
+                else 
+                    h3="Edit Record id#"+this.props.game_details._id            
                 label(for="game_title") Title for Game
                     input(type="text",name="game_title",value=this.props.game_details.game_title,onChange=this.props.onFieldChange)
                 label(for="num_questions") Number of Questions

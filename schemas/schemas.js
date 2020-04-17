@@ -36,33 +36,6 @@ function AppSchemas() {
                 default: Date.now
             }
         },
-        "team": {
-            team_name: {
-                type: String,
-                default: "INSERT YOUR NAME"
-            },
-            history: {
-                type: String
-            },
-            created: {
-                type: Date,
-                default: Date.now
-            }
-        },
-        "game_token": {
-            game_id : {
-                ref:"game",
-                type: mongoose.Schema.Types.ObjectId
-            },
-            token: {
-                type:String,
-                unique:true
-            },
-            created: {
-                type: Date,
-                default: Date.now
-            }       
-        },
         "game": {
             start_time: {
                 type: String,
@@ -80,6 +53,10 @@ function AppSchemas() {
                 max: 20,
                 default: 0
             },
+            game_code: {
+                type:String,
+                unique:true
+            },
             game_title: {
                 type: String
             },
@@ -88,12 +65,10 @@ function AppSchemas() {
             },
             teams: [{
                 team: {
-                    ref: "team",
-                    type: mongoose.Schema.Types.ObjectId
+                    type: String
                 },
                 score: {
                     type: Number,
-                    min: 1,
                     default: 0
                 }
             }],

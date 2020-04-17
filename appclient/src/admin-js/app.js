@@ -30,111 +30,128 @@ class App extends Component {
 
     constructor(props) {
         super(props);
-        let now = new Date();
 
         this.state = {
             mode: "manager", // "create","run-game","manage-game"
-            games:[],
-            game_details: {
-                game_title:"BLANK",
-                start_time: now.toString(),
-                game_codes: [],
-                game_description: "BLANK",
-                num_questions: 20
-            }
+            games: [],
+            game_details: this.blankRecord
         };
         this.onTimeChange = this.onTimeChange.bind(this);
         this.onFieldChange = this.onFieldChange.bind(this);
-        this.onCodesChange = this.onCodesChange.bind(this);
         this.onSelectChange = this.onSelectChange.bind(this);
         this.onWysiwygChange = this.onWysiwygChange.bind(this);
     }
-
+    blankRecord = {
+        game_title: "",
+        start_time: new Date(),
+        game_description: "",
+        num_questions: 20
+    }
+    componentDidMount() {
+        this.launchManager();
+    }
     startEditMode(recordid) {
-        ApiConnector("read",{id : recordid},"game")
+        ApiConnector("read", { id: recordid }, "game")
             .then(res.json())
             .then(console.log(res))
     }
     onTimeChange = e => {
         console.log(e);
-        this.state.game_details.start_time = e;
-        this.setState(this.state);
+        this.state.game_details.start_time = e
+        this.setState(this.state)
     }
     launchManager = () => {
-        this.state.mode="manager";
-        this.setState(this.state);
+        this.state.mode = "manager"
+        this.fetchGames()
+        this.setState(this.state)
     }
     newGame = () => {
-        this.state.mode="create";
-        this.setState(this.state);   
+        this.state.mode = "create"
+        this.state.game_details = this.blankRecord
+        this.state.game_details.game_code = this.generateCode()
+        this.setState(this.state)
     }
     onFieldChange = e => {
         this.state.game_details[e.target.name] = e.target.value
-        this.setState(this.state);
+        this.setState(this.state)
     }
 
-    onCodesChange = e => {
-        this.state.game_details.game_codes = e.target.value.split(",")
-        this.setState(this.state);
-    }
     onWysiwygChange = output => {
         this.state.game_details.game_description = output
-        this.setState(this.state);
+        this.setState(this.state)
     }
 
     onSelectChange = e => {
         this.state.game_details.num_questions = e.target.options[e.target.selectedIndex].value
-        this.setState(this.state);
+        this.setState(this.state)
     }
     editGame = record => {
-        this.state.mode="edit";
-        this.state.game_details=record;
-        this.setState(this.state);
+        this.state.mode = "edit"
+        this.state.game_details = record
+        this.setState(this.state)
     }
     deleteGame = record => {
-        console.log(record);
+        console.log(record)
     }
     createGame = e => {
         e.preventDefault()
         let formData = JSON.stringify(this.state.game_details);
-        ApiConnector("create",formData,"game")
+        ApiConnector("create", formData, "game")
             .then(res => {
-                this.state.game_details = res;
+                this.state.game_details = res
                 this.state.mode = "edit"
-                this.setState(this.state);
+                this.setState(this.state)
             })
     }
     fetchGames = () => {
-        ApiConnector("read","","game")
+        ApiConnector("read", "", "game")
             .then(res => {
-                this.state.games = res;
-                this.setState(this.state);
+                this.state.games = res
+                this.setState(this.state)
             })
     }
     updateGame = e => {
         e.preventDefault();
-        let formData = JSON.stringify(this.state.game_details);
-        ApiConnector("update",formData,"game")
+        let formData = JSON.stringify(this.state.game_details)
+        ApiConnector("update", formData, "game")
             .then(res => {
-                this.state.game_details = res;
+                this.state.game_details = res
                 this.state.mode = "edit"
-                this.setState(this.state);
-            })      
+                this.setState(this.state)
+            })
+    }
+    generateCode = () => {
+        
+        let hash = a => {
+            a = (a + 0x7ed55d16) + (a << 12)
+            a = (a ^ 0xc761c23c) ^ (a >> 19)
+            a = (a + 0x165667b1) + (a << 5)
+            a = (a + 0xd3a2646c) ^ (a << 9)
+            a = (a + 0xfd7046c5) + (a << 3)
+            a = (a ^ 0xb55a4f09) ^ (a >> 16)
+            if (a < 0) a = 0xffffffff + a
+            return a;
+        }
+        var seed = new Date().getTime() / 1000
+        console.log("New Token:",hash(seed))
+        return hash(seed)
     }
     render() {
-        
+
         return pug`
             nav    
                 a(href="#",onClick=this.launchManager) Manage Games
                 a(href="#",onClick=this.newGame) Create New Game
             if this.state.mode=="manager"
-                - this.fetchGames()
                 GameManager(
                     games=this.state.games,
                     editGame=this.editGame,
                     deleteGame=this.deleteGame
                     )
             else
+                if this.state.mode=="edit"
+                    h3 Player Link:
+                    a(href="http://teamtrivia.local/?pqid="+this.state.game_details.game_code)="http://teamtrivia.local/?pqid="+this.state.game_details.game_code
                 GameForm(
                     game_details=this.state.game_details,
                     onWysiwygChange=this.onWysiwygChange,
