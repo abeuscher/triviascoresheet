@@ -67,9 +67,38 @@ function AppSchemas() {
                 team: {
                     type: String
                 },
-                score: {
-                    type: Number,
-                    default: 0
+                answers: [{
+                    q : {
+                        type : Number
+                    },
+                    answer : {
+                        type: String
+                    },
+                    bid: {
+                        type:Number
+                    },
+                    correct: {
+                        type: Boolean,
+                        default:false
+                    }
+                }]
+            }],
+            answer_basket:[{
+                team_name: {
+                    type:String
+                },
+                q : {
+                    type : Number
+                },
+                answer : {
+                    type: String
+                },
+                bid: {
+                    type:Number
+                },
+                correct: {
+                    type: Boolean,
+                    default:false
                 }
             }],
             created: {

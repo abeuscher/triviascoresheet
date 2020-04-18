@@ -1,0 +1,42 @@
+.scoresheet {
+    .flex {
+        display:flex;
+    }
+    .team-column {
+        flex-basis: 20%;
+    }
+    nav {
+        display: block;
+        margin-bottom: 10px;
+        a {
+            display: inline-block;
+            padding: 0.5em 1em;
+            background: gray;
+            color: white;
+            border-radius: 3px;
+            margin-right: 1em;
+            text-decoration: none;
+        }
+    }
+    .answer-box {
+        flex-basis: 3%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        border: 1px solid black;
+        &.blank {
+            background: gray;
+        }
+        p {
+            display: inline-block;
+            margin: 0;
+            &.false {
+                color: red;
+            }
+            &.true {
+                color: green;
+            }
+        }
+    }
+}

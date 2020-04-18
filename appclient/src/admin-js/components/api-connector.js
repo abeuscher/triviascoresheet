@@ -5,7 +5,8 @@ function apiConnector(action, data, type) {
         create: rootpath + "create/" + type,
         read: rootpath + "get/" + type,
         update: rootpath + "update/" + type,
-        delete: rootpath + "delete/" + type
+        delete: rootpath + "delete/" + type,
+        scoreanswer: rootpath + "scoreanswer/"
     }
 
     console.log("API Call: " + paths[action], data, type)

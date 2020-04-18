@@ -1,0 +1,12 @@
+.answer-basket {
+    .flex {
+        display:flex;
+    }
+    .column {
+        flex-basis:20%;
+        &.header p {
+            font-weight:bold;
+        }
+        border:1px solid black;
+    }
+}

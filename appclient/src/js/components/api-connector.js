@@ -3,6 +3,7 @@ function apiConnector(action, data, type) {
     let rootpath = "http://localhost:5000/";
     let paths = {
         addTeam: rootpath + "addteam/",
+        submitAnswer: rootpath + "submitanswer/",
         create: rootpath + "create/" + type,
         read: rootpath + "get/" + type,
         update: rootpath + "update/" + type,
