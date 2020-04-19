@@ -27,57 +27,82 @@ import AnswerBasket from './components/answer-basket'
         
 
 */
-
 class App extends Component {
 
     constructor(props) {
         super(props);
+        let saveState = this.getLocalStorage();
+        this.state = saveState ? saveState : this.defaultState;
+        this.makeSocketConnection()
 
-        this.state = {
-            mode: "manager", // "create","play","manager"
-            games: [],
-            io: {
-                socket: null,
-                joined: false
-            },
-            game: this.blankRecord
-        };
-        this.onTimeChange = this.onTimeChange.bind(this);
-        this.onFieldChange = this.onFieldChange.bind(this);
-        this.onSelectChange = this.onSelectChange.bind(this);
-        this.onWysiwygChange = this.onWysiwygChange.bind(this);
+        if (saveState) {
+            this.refreshGame()
+        }
+        if (this.state.mode=="manager") {
+            this.launchManager();
+        }   
     }
-    blankRecord = {
-        game_title: "",
-        start_time: new Date(),
-        game_description: "",
-        num_questions: 20,
-        teams:[],
-        answer_basket:[]
+    socket = io('http://teamtrivia.localapi:5000')
+    makeSocketConnection = () => {
+        this.socket.on('connect', () => {
+            this.socket.emit("identify host","Hey guys!")
+            console.log("Socket connected")
+        });
+        this.socket.on('disconnect', function () {
+            console.log("Socket lost")
+        });
+        this.socket.on("clientmsg",msg => {
+            this.handleClient(msg)
+        })
     }
-    componentDidMount() {
-        this.launchManager();
-        if (!this.state.io.socket) {
-            this.state.io.socket = this.startIO()
-            this.setState(this.state);
-            this.state.io.socket.on('connect', () => {
-                console.log("Socket connected")
-                this.startHostChat(this.state.io.socket)
-            });
-            this.state.io.socket.on('disconnect', function () {
-                this.handleDroppedConnection()
-            });
-            this.state.io.socket.on('host message', msg=> {
-                console.log(msg)
-            });
+    defaultState = {
+        mode: "manager", // "create","play","manager"
+        games: [],
+        io: {
+            socket: null,
+            joined: false
+        },
+        game: {
+            _id:null,
+            game_title: "",
+            start_time: new Date(),
+            game_description: "",
+            num_questions: 20,
+            teams:[],
+            answer_basket:[]
         }
     }
-    startIO = () => {
-        return io('http://teamtrivia.localapi:5000');
+    setLocalStorage = () => {
+        console.log(this.state);
+        let tempState = this.state;
+        tempState.io.socket = null;
+        tempState.io.joined = false;
+        if (this.state.game._id != null) {
+            console.log("Save to local storage")
+            window.sessionStorage.setItem("adminstate", JSON.stringify(tempState));
+        }
     }
-    startHostChat = (socket) => {
-        socket.emit("gamecontrol","Host Joined");
+
+    getLocalStorage = () => {
+        if (window.sessionStorage.getItem("adminstate") != undefined) {
+            return JSON.parse(window.sessionStorage.getItem("adminstate"))
+        }
+        return false
     }
+
+    wipeLocalStorage = () => {
+        window.sessionStorage.removeItem("adminstate")
+        var f = window.sessionStorage.getItem("adminstate")
+    }
+    handleClient = msg => {
+        if (msg=="answerdropped") {
+            this.refreshGame();
+        }
+    }
+    componentDidUpdate() {
+        this.setLocalStorage()
+    }
+
     startEditMode(recordid) {
         ApiConnector("read", { id: recordid }, "game")
             .then(res.json())
@@ -90,8 +115,8 @@ class App extends Component {
     }
     launchManager = () => {
         this.state.mode = "manager"
-        this.fetchGames()
         this.setState(this.state)
+        this.fetchGames()
     }
     newGame = () => {
         this.state.mode = "create"
@@ -139,6 +164,7 @@ class App extends Component {
     fetchGames = () => {
         ApiConnector("read", "", "game")
             .then(res => {
+                console.log(res);
                 this.state.games = res
                 this.setState(this.state)
             })
@@ -153,6 +179,16 @@ class App extends Component {
                 this.setState(this.state)
             })
     }
+    refreshGame = () => {
+        let formData = {
+            id:this.state.game._id
+        }
+        ApiConnector("read",JSON.stringify(formData),"game")
+            .then(res=>{
+                this.state.game = Object.assign({},this.state.game,res)
+                this.setState(this.state)
+            })
+    }
     gradeAnswer = (answer,correct) => {
         answer.correct=correct
         let formData = {
@@ -161,11 +197,23 @@ class App extends Component {
         }
         ApiConnector("scoreanswer",JSON.stringify(formData))
             .then(res=>{
+                this.refreshGame()
                 console.log(res)
             })
     }
-    nextQuestion = () => {
-        this.state.io.socket.emit("gamecontrol","nextquestion")
+    changeQuestion = newQ => {
+        console.log("Go to q " + newQ)
+        this.state.game = Object.assign({},this.state.game,{
+            current_question:newQ
+        })
+       
+        ApiConnector("update",JSON.stringify(this.state.game),"game")
+            .then(res=>{     
+                this.state.game = Object.assign({},this.state.game,res)
+                this.setState(this.state)
+                this.socket.emit("gamecontrol","refreshdb")
+            })
+        
     }
     generateCode = () => {
         
@@ -220,7 +268,7 @@ class App extends Component {
                     )
                     Scoresheet(
                         game=this.state.game,
-                        nextQuestion=this.nextQuestion
+                        changeQuestion=this.changeQuestion
                     )
         `
     }

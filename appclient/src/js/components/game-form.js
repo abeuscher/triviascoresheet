@@ -24,12 +24,19 @@ export default class GameForm extends Component {
                 else
                     h4="Current Question: " + game.current_question
                     p=this.props.instructions[this.props.instructionMap[game.current_question]]
-                    label answer
-                        input(type="text",name="current_answer",onChange=this.props.changeAnswer)
-                    label bid
-                        select(onChange=this.props.changeBid)
-                            for bid,idx in game.bids
-                                option(key="bid-option-"+idx,value=bid)=bid
+                    if game.current_question==5 || game.current_question==15
+                        label answers
+                        input(type="text",onChange=e=>{this.props.changeAnswer(e,0)},value=this.props.current_answer[0])
+                        input(type="text",onChange=e=>{this.props.changeAnswer(e,1)},value=this.props.current_answer[1])
+                        input(type="text",onChange=e=>{this.props.changeAnswer(e,2)},value=this.props.current_answer[2])
+                        input(type="text",onChange=e=>{this.props.changeAnswer(e,3)},value=this.props.current_answer[3])
+                    else
+                        label answer
+                            input(type="text",name="current_answer",onChange=e=>{this.props.changeAnswer(e,0)},value=this.props.current_answer[0])
+                        label bid
+                            select(onChange=this.props.changeBid)
+                                for bid,idx in game.bids
+                                    option(key="bid-option-"+idx,value=bid)=bid
                     button(onClick=this.props.submitAnswer) Submit Answer
         `
     }

@@ -8,6 +8,11 @@ export default class AnswerBasket extends Component {
 
     render() {
         return pug`
+            if !this.props.answers.length
+                .answer-basket.flex
+                    .answer-row.flex.header
+                        h2 Empty Basket
+            else
                 .answer-basket.flex
                     .answer-row.flex.header
                         .column.question
@@ -29,10 +34,12 @@ export default class AnswerBasket extends Component {
                             .column.bid
                                 p=answer.bid
                             .column.answer
-                                p=answer.answer
+                                for a in answer.answer
+                                    p=a
                             .column.controls
-                                a.mark-right(href="#",onClick=e=>{e.preventDefault();this.props.gradeAnswer(answer,true)}) correct                           
-                                a.mark-right(href="#",onClick=e=>{e.preventDefault();this.props.gradeAnswer(answer,false)}) incorrect                           
+                                for a in answer.answer
+                                    a.mark-right(href="#",onClick=e=>{e.preventDefault();this.props.gradeAnswer(a,true)}) correct                           
+                                    a.mark-right(href="#",onClick=e=>{e.preventDefault();this.props.gradeAnswer(a,false)}) incorrect                           
         `
     }
 }

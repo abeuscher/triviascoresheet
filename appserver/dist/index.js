@@ -195,6 +195,7 @@ const io = require('socket.io')(server, {
     origin: 'http://teamtrivia.local',
     cookie: false
 });
+let host=null;
 io.on('connection', (socket) => {
     socket.emit("welcome","Hey there");
     console.log('a user connected');
@@ -204,10 +205,18 @@ io.on('connection', (socket) => {
     socket.on("host message", (msg) => {
         console.log('message: ' + msg);
       });
-      socket.on("gamecontrol", (msg) => {
-        console.log('gc message: ' + msg);
-        io.emit("gamecontrol",msg);
-      });
+      socket.on("clientmsg",msg=> {
+        if (host) {
+            host.emit("clientmsg",msg)
+        }
+      })
+      socket.on("identify host",msg=> {
+          host = socket;
+            host.on("gamecontrol", (msg) => {
+                io.emit("gamecontrol",msg);
+            });          
+      })
+
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });

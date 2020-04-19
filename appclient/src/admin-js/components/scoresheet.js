@@ -7,13 +7,13 @@ export default class Scoresheet extends Component {
     }
     scoreUpdateMap = [5,10,15,19]
     checkForUpdate = q => {
-        return this.scoreUpdateMap.indexOf(q-1)>-1
+        return this.scoreUpdateMap.indexOf(q)>-1
     }
     getScore = (question,answers) => {
         let output = false;
         answers.forEach(answer => {
             if (answer.q==question) {
-                output = true;
+                output = answer;
             }
         })
         return output;
@@ -25,38 +25,44 @@ export default class Scoresheet extends Component {
             header
                 h2=this.props.game.game_title
                 h3 Status: In progress
-                h4="Total Teams: "+ this.props.game.teams.length
+                h4="Current Question: "+this.props.game.current_question
+                h5="Total Teams: "+ this.props.game.teams.length
             nav
-                a.advance-question(href="#",onClick=this.props.nextQuestion) Next Question
-                a.start-timer(href="#") Start One Minute Timer
-            .answer-basket
-                .scoresheet-header-row.flex
-                    .team-column
-                        p Team Name
+                if this.props.game.current_question>1
+                    a.previous-question(key="scoresheet-btn-prev-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question-1)}) Previous Question
+                if this.props.game.current_question<20
+                    a.next-question(key="scoresheet-btn-next-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question+1)}) Next Question
+                a.start-timer(key="scoresheet-btn-start-timer",href="#") Start One Minute Timer
+            .scoresheet-header(key="scoresheet-header")
+                .scoresheet-header-row.flex(key="scoresheet-header-row")
+                    .team-column(key="scoresheet-team-name-header")
+                        p(key="scoresheet-team-name-header-label") Team Name
                     while c<21
-                        .answer-box(key="header-"+c)
-                            p(key='header-p-'+c)=c++
+                        .answer-box(key="scoresheet-header-"+c)
+                            p(key="scoresheet-header-p-"+c)=c
                         if this.checkForUpdate(c)
-                            .answer-box.update(key="header-update-"+c)
-                                p(key='header-update-p-'+c) U
+                            .answer-box.update(key="scoresheet-header-update-"+c)
+                                p(key="scoresheet-header-update-p-"+c) U
+                        - c++
             for score,score_idx in this.props.game.teams
-                .score-row.flex(key='form-row-'+score_idx)
-                    .team-column(key='team-column-'+score_idx)
-                        h2(key='team-label-'+score_idx)=score.team
-                    - c = 1, total = 0;
+                - c = 1, total = 0;
+                .score-row.flex(key="scoresheet-form-row-"+score_idx)
+                    .team-column(key="scoresheet-team-column-"+score_idx)
+                        h2(key="scoresheet-team-label-"+score_idx)=score.team 
                     while c<21
                         if this.getScore(c,score.answers)
-                            .answer-box(key='answer-column-'+score_idx+"-"+c)
-                                p(key='answer-label-'+score_idx+"-"+c,className=item.correct)=item.bid
+                            - let item = this.getScore(c,score.answers)
+                            .answer-box(key="answer-"+score_idx+"-"+c)
+                                p(key="answer-label-"+score_idx+"-"+c,className=item.correct.toString())=item.bid
                                 - total = total + item.bid                     
                         else
-                            .answer-box.blank(key='answer-column-'+score_idx+"-"+c)
-                                p(key='answer-label-'+score_idx+"-"+c)=" "              
+                            .answer-box.blank(key="blank-"+score_idx+"-"+c)
+                                p(key="blank-label-"+score_idx+"-"+c)=" "                   
                         if this.checkForUpdate(c)
-                            .answer-box.update(key='answer-update-'+score_idx+"-"+c)
-                                p(key='answer-update-label-'+score_idx+"-"+c) U
-                        - c++      
-                
+                            - let cellVal = c<=this.props.game.current_question ? total : "U"
+                            .answer-box.update(key="update-"+score_idx+"-"+c)
+                                p(key="update-label-"+score_idx+"-"+c)=cellVal 
+                        - c++                     
         `
     }
 }

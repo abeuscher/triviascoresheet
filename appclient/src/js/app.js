@@ -28,41 +28,39 @@ import io from 'socket.io-client'
 class App extends Component {
 
     constructor(props) {
-        super(props);
-        let saveState = this.getLocalStorage();
-        this.state = saveState ? saveState : this.defaultState;
-    }
+        super(props)
+        let saveState = this.getLocalStorage()
+        this.state = saveState ? saveState : this.defaultState
 
-    componentDidMount() {
+        this.socket.on('connect', () => {
+            console.log("Socket connected")
+        });
+        this.socket.on('disconnect', function () {
+            console.log("Socket dropped")
+        });
+        this.socket.on('host message', msg=> {
+            console.log(msg)
+        });
+        this.socket.on("gamecontrol", msg=> {
+            this.handleGameControl(msg)
+        })
+        if (saveState) {
+            this.refreshGame()
+        }
+
         if (this.state.mode == "fresh") {
             this.initGameFromHash()
-        }
-        if (!this.state.io.socket) {
-            this.state.io.socket = this.startIO()
-            this.setState(this.state)
-            this.state.io.socket.on('connect', () => {
-                console.log("Socket connected")
-
-            });
-            this.state.io.socket.on('disconnect', function () {
-                this.handleDroppedConnection()
-            });
-            this.state.io.socket.on('gamecontrol', data => {
-                this.handleGameControl(data);
-            });
-            this.state.io.socket.emit("host message", "New team joining...")
-            
-        }
+        } 
 
     }
-    startIO = () => {
-        return io('http://teamtrivia.localapi:5000');
-    }
+
+    socket = io('http://teamtrivia.localapi:5000')
+
     handleGameControl = data => {
+        console.log("Game Control:",data)
         if (data=="refreshdb") {
             this.refreshGame();
         }
-        console.log(data)
     }
     componentDidUpdate() {
         this.setLocalStorage()
@@ -92,7 +90,7 @@ class App extends Component {
                 current_score: 0
             },
             bids: [1, 3, 5, 7],
-            current_answer: "",
+            current_answer: [],
             current_bid: null
         }
     }
@@ -195,7 +193,8 @@ class App extends Component {
         }
         ApiConnector("read",JSON.stringify(formData),"game")
             .then(res=>{
-                console.log(res);
+                this.state.game = Object.assign({},this.state.game,res)
+                this.setState(this.state)
             })
     }
     handleAnswerSubmit = e => {
@@ -212,11 +211,12 @@ class App extends Component {
         ApiConnector("submitAnswer", JSON.stringify(answerData))
             .then(res => {
                 console.log(res);
+                this.socket.emit("clientmsg","answerdropped")
             })
         console.log("Answer submitted");
     }
-    changeAnswer = e => {
-        this.state.current_answer=e.target.value
+    changeAnswer = (e,numAnswer) => {
+        this.state.current_answer[numAnswer]=e.target.value
         this.setState(this.state)
     }
     changeBid = e => {

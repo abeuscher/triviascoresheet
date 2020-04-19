@@ -9,7 +9,7 @@ function apiConnector(action, data, type) {
         scoreanswer: rootpath + "scoreanswer/"
     }
 
-    console.log("API Call: " + paths[action], data, type)
+    //console.log("API Call: " + paths[action], data, type)
     
     return fetch(paths[action], Object.assign({}, {
         method: 'POST',

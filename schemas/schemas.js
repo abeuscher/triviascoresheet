@@ -38,8 +38,8 @@ function AppSchemas() {
         },
         "game": {
             start_time: {
-                type: String,
-                default: "Strain Name"
+                type: Date,
+                default: Date.now
             },
             num_questions: {
                 type: Number,
@@ -54,8 +54,8 @@ function AppSchemas() {
                 default: 0
             },
             game_code: {
-                type:String,
-                unique:true
+                type: String,
+                unique: true
             },
             game_title: {
                 type: String
@@ -63,42 +63,56 @@ function AppSchemas() {
             game_description: {
                 type: String
             },
-            teams: [{
+            scores: [{
                 team: {
                     type: String
                 },
                 answers: [{
-                    q : {
-                        type : Number
+                    q: {
+                        type: Number
                     },
-                    answer : {
-                        type: String
-                    },
+                    answer: [{
+                        answer_text: {
+                            type: String
+                        },
+                        correct: {
+                            type: Boolean,
+                            default: false
+                        }
+                    }],
                     bid: {
-                        type:Number
+                        type: Number
                     },
-                    correct: {
-                        type: Boolean,
-                        default:false
+                    created: {
+                        type: Date,
+                        default: Date.now
                     }
                 }]
             }],
-            answer_basket:[{
+            answer_basket: [{
                 team_name: {
-                    type:String
-                },
-                q : {
-                    type : Number
-                },
-                answer : {
                     type: String
                 },
+                q: {
+                    type: Number
+                },
+                answer: [{
+                    type: String
+                }],
                 bid: {
-                    type:Number
+                    type: Number
                 },
                 correct: {
                     type: Boolean,
-                    default:false
+                    default: false
+                },
+                graded: {
+                    type: Boolean,
+                    default: false
+                },
+                created: {
+                    type: Date,
+                    default: Date.now
                 }
             }],
             created: {
