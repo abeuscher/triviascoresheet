@@ -7,6 +7,7 @@ export default class GameManager extends Component {
     }
 
     render() {
+        console.log(this.props.games)
         return pug`
             .manager-container
                 h3 Edit or Delete Games:

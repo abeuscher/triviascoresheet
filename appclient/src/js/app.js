@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
 import IntroForm from './components/intro-form'
-import GameForm from './components/game-form'
+import AnswerForm from './components/answer-form'
 
 import ApiConnector from './components/api-connector'
 
@@ -31,68 +31,67 @@ class App extends Component {
         super(props)
         let saveState = this.getLocalStorage()
         this.state = saveState ? saveState : this.defaultState
+        this.makeSocketConnection()
 
+        if (saveState) {
+            this.state.current_answer_sheet = this.makeBlankAnswerSheet()
+            this.refreshGame()
+        }
+        if (this.state.mode == "fresh") {
+            this.initGameFromHash()
+        }
+
+    }
+
+    socket = io('http://teamtrivia.localapi:5000')
+    makeSocketConnection = () => {
         this.socket.on('connect', () => {
             console.log("Socket connected")
         });
         this.socket.on('disconnect', function () {
             console.log("Socket dropped")
         });
-        this.socket.on('host message', msg=> {
+        this.socket.on('host message', msg => {
             console.log(msg)
         });
-        this.socket.on("gamecontrol", msg=> {
+        this.socket.on("gamecontrol", msg => {
             this.handleGameControl(msg)
         })
-        if (saveState) {
-            this.refreshGame()
-        }
-
-        if (this.state.mode == "fresh") {
-            this.initGameFromHash()
-        } 
-
     }
-
-    socket = io('http://teamtrivia.localapi:5000')
-
     handleGameControl = data => {
-        console.log("Game Control:",data)
-        if (data=="refreshdb") {
+        console.log("Game Control:", data)
+        if (data == "refreshdb") {
+            this.state.mode="active"
+            this.setState(this.state)
             this.refreshGame();
         }
     }
     componentDidUpdate() {
         this.setLocalStorage()
-        if (this.state.io.socket && !this.state.io.joined && this.state.game.team_name != "") {
-            this.state.io.socket.emit("host message", this.state.game.team_name + " has signed in")
-            this.state.io.joined = true;
-            this.setState(this.state)
-        }
     }
     defaultState = {
-        mode: "fresh", //fresh, active, over
+        mode: "fresh", //fresh, active, waiting, over
         error: "",
-        io: {
-            socket: null,
-            joined: false
+        team: {
+            team_name: ""
         },
-        game: {
-            team_name: "BLANK",
-            _id: null,
-            game_title: "",
-            game_details: "",
-            start_time: null,
-            round: 0,
-            question: 0,
-            score: {
-                history: [],
-                current_score: 0
-            },
-            bids: [1, 3, 5, 7],
-            current_answer: [],
-            current_bid: null
+        game: null,
+        current_answer_sheet:null,
+        bids:[1,3,5,7],
+        answer_history: []
+    }
+    makeBlankAnswerSheet = () => {
+        let answers = [5,15].indexOf(this.state.game.current_question) > -1 ? [this.blankAnswer,this.blankAnswer,this.blankAnswer,this.blankAnswer] : [this.blankAnswer]
+        return {
+            game: this.state.game._id,
+            team: this.state.team._id,
+            q: this.state.game.current_question,
+            answers: answers
         }
+    }
+    blankAnswer = {
+        content:"",
+        bid:null
     }
     instructionStrings = [
         "Game has not yet started. Hold tight.",
@@ -105,11 +104,8 @@ class App extends Component {
     ]
     instructionMap = [0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 3, 4, 4, 4, 4, 5, 4, 4, 4, 4, 6]
     setLocalStorage = () => {
-        let tempState = this.state;
-        tempState.io.socket = null;
-        tempState.io.joined = false;
         if (this.state.game._id != null) {
-            window.sessionStorage.setItem("gamestate", JSON.stringify(tempState));
+            window.sessionStorage.setItem("gamestate", JSON.stringify(this.state));
         }
     }
 
@@ -140,6 +136,7 @@ class App extends Component {
         else {
             ApiConnector("read", JSON.stringify({ game_code: url_hash }), "game")
                 .then(res => {
+                    console.log(res)
                     if (res.length == 1) {
                         this.state.game = Object.assign({}, this.state.game, res[0])
                         this.setState(this.state)
@@ -147,7 +144,6 @@ class App extends Component {
                     else {
                         this.state.error = "No game specified. Bad URL";
                         this.setState(this.state)
-
                     }
                 })
 
@@ -169,58 +165,63 @@ class App extends Component {
     }
 
     handleFormChange = e => {
-        let newValue = e.target.value
-        let name = e.target.name
-        this.state.game[name] = newValue
+        this.state.team[e.target.name] = e.target.value
         this.setState(this.state);
     }
 
     handleIntroFormSubmit = e => {
-        console.log("Add Team", this.state);
-        ApiConnector("addTeam", JSON.stringify({ id: this.state.game._id, team_name: this.state.game.team_name }))
+        ApiConnector("addTeam", JSON.stringify({ _id: this.state.game._id, team: { team_name: this.state.team.team_name } }))
             .then(res => {
                 console.log(res)
-                if (res.game) {
+                if (res._id) {
                     this.state.mode = "active"
+                    this.state.team = res
                     this.setState(this.state)
+                    this.checkForAnswerSheet()
                 }
-
+                else {
+                    this.state.error = "Problem signing in to game"
+                }
             })
     }
     refreshGame = () => {
         let formData = {
-            id:this.state.game._id
+            id: this.state.game._id
         }
-        ApiConnector("read",JSON.stringify(formData),"game")
-            .then(res=>{
-                this.state.game = Object.assign({},this.state.game,res)
+        ApiConnector("read", JSON.stringify(formData), "game")
+            .then(res => {
+                this.state.game = Object.assign({}, this.state.game, res)
                 this.setState(this.state)
+                this.checkForAnswerSheet()
             })
+    }
+    checkForAnswerSheet = () => {
+        if (this.state.current_answer_sheet==null && this.state.game.current_question>0) {
+            this.state.current_answer_sheet= this.makeBlankAnswerSheet()
+            this.setState(this.state)
+            console.log(this.state)
+        }
     }
     handleAnswerSubmit = e => {
         e.preventDefault()
-        let answerData = {
-            id: this.state.game._id,
-            answer: {
-                team_name: this.state.game.team_name,
-                q: this.state.game.current_question,
-                answer: this.state.current_answer,
-                bid: this.state.current_bid
-            }
-        }
-        ApiConnector("submitAnswer", JSON.stringify(answerData))
+        let formData = this.state.current_answer_sheet
+        formData.team = this.state.team
+        ApiConnector("submitAnswer", JSON.stringify(formData))
             .then(res => {
-                console.log(res);
-                this.socket.emit("clientmsg","answerdropped")
+                this.state.answer_history.push(res)
+                this.state.current_answer_sheet=this.makeBlankAnswerSheet()
+                this.setState(this.state)
+                this.socket.emit("clientmsg", "answerdropped")
             })
         console.log("Answer submitted");
     }
-    changeAnswer = (e,numAnswer) => {
-        this.state.current_answer[numAnswer]=e.target.value
+    changeAnswer = (e, numAnswer) => {
+        e.preventDefault()
+        this.state.current_answer_sheet.answers[numAnswer].content = e.target.value
         this.setState(this.state)
     }
     changeBid = e => {
-        this.state.current_bid=e.target.options[e.target.selectedIndex].value
+        this.state.current_answer_sheet.answers[0].bid = e.target.options[e.target.selectedIndex].value
         this.setState(this.state)
     }
     render() {
@@ -231,15 +232,16 @@ class App extends Component {
             else
                 if this.state.mode=="fresh"
                     IntroForm(
-                        teamName=this.state.teamName,
                         game=this.state.game,
+                        team=this.state.team,
                         onChange=this.handleFormChange,
                         onSubmit=this.handleIntroFormSubmit
                         )
                 if this.state.mode=="active"
-                    GameForm(
+                    AnswerForm(
                         game=this.state.game,
-                        onChange=this.handleFormChange,
+                        answer_sheet=this.state.current_answer_sheet,
+                        bids=this.state.bids,
                         submitAnswer=this.handleAnswerSubmit,
                         instructions=this.instructionStrings,
                         instructionMap=this.instructionMap,

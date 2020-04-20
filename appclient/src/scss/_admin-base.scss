@@ -52,6 +52,9 @@ nav {
         margin-right:$gutter-width;
     }
 }
+.padded-column {
+    padding:0 $gutter-width;
+}
 .code-list {
     input {
         position:relative;

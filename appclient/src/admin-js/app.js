@@ -11,6 +11,7 @@ import GameForm from './components/game-form'
 import GameManager from './components/game-manager'
 import Scoresheet from './components/scoresheet'
 import AnswerBasket from './components/answer-basket'
+import WaitingRoom from './components/waiting-room'
 
 /*
 
@@ -22,7 +23,6 @@ import AnswerBasket from './components/answer-basket'
      - Also should feature: Game Zoom Link, have space for other materials like PDFS or whatever.
 
     Next Steps:
-        - Get host to be able to trgiger next questions
         - Add undo / edit feature to answer sheet
         
 
@@ -37,10 +37,13 @@ class App extends Component {
 
         if (saveState) {
             this.refreshGame()
-        }
+        }   
+        
+    }
+    componentDidMount() {
         if (this.state.mode=="manager") {
             this.launchManager();
-        }   
+        }
     }
     socket = io('http://teamtrivia.localapi:5000')
     makeSocketConnection = () => {
@@ -58,28 +61,22 @@ class App extends Component {
     defaultState = {
         mode: "manager", // "create","play","manager"
         games: [],
-        io: {
-            socket: null,
-            joined: false
-        },
         game: {
             _id:null,
             game_title: "",
             start_time: new Date(),
             game_description: "",
             num_questions: 20,
-            teams:[],
+            game_code:"",
+            waiting_room:[],
+            scoresheet:[],
             answer_basket:[]
         }
     }
     setLocalStorage = () => {
-        console.log(this.state);
-        let tempState = this.state;
-        tempState.io.socket = null;
-        tempState.io.joined = false;
         if (this.state.game._id != null) {
             console.log("Save to local storage")
-            window.sessionStorage.setItem("adminstate", JSON.stringify(tempState));
+            window.sessionStorage.setItem("adminstate", JSON.stringify(this.state));
         }
     }
 
@@ -102,12 +99,6 @@ class App extends Component {
     componentDidUpdate() {
         this.setLocalStorage()
     }
-
-    startEditMode(recordid) {
-        ApiConnector("read", { id: recordid }, "game")
-            .then(res.json())
-            .then(console.log(res))
-    }
     onTimeChange = e => {
         console.log(e);
         this.state.game.start_time = e
@@ -120,7 +111,7 @@ class App extends Component {
     }
     newGame = () => {
         this.state.mode = "create"
-        this.state.game = this.blankRecord
+        this.state.game = this.defaultState.game
         this.state.game.game_code = this.generateCode()
         this.setState(this.state)
     }
@@ -144,17 +135,18 @@ class App extends Component {
         this.setState(this.state)
     }
     deleteGame = record => {
-        console.log(record)
+        console.log("I could delete this record:",record)
     }
     playGame = game => {
         this.state.game=game
+        this.refreshGame()
         this.state.mode="play"
         this.setState(this.state)
     }
     createGame = e => {
         e.preventDefault()
         let formData = JSON.stringify(this.state.game);
-        ApiConnector("create", formData, "game")
+        ApiConnector("createGame", formData)
             .then(res => {
                 this.state.game = res
                 this.state.mode = "edit"
@@ -162,11 +154,23 @@ class App extends Component {
             })
     }
     fetchGames = () => {
-        ApiConnector("read", "", "game")
+        ApiConnector("getGame", "", "game")
             .then(res => {
-                console.log(res);
                 this.state.games = res
                 this.setState(this.state)
+                console.log("retrieved games:",res)
+            })
+    }
+    addTeamToSheet = team => {
+        this.state.game.waiting_room = this.state.game.waiting_room.filter(t=>{return t._id!=team._id})
+        this.state.game.scoresheet.push({
+            team: team,
+            answer_sheets:[]
+        })
+        this.setState(this.state)
+        ApiConnector("update",JSON.stringify(this.state.game),"game")
+            .then(res=>{
+                console.log(res)
             })
     }
     updateGame = e => {
@@ -183,22 +187,45 @@ class App extends Component {
         let formData = {
             id:this.state.game._id
         }
-        ApiConnector("read",JSON.stringify(formData),"game")
+        ApiConnector("getGame",JSON.stringify(formData),"game")
             .then(res=>{
-                this.state.game = Object.assign({},this.state.game,res)
+                this.state.game = res
                 this.setState(this.state)
+                this.labelAnswerSheets()
             })
     }
-    gradeAnswer = (answer,correct) => {
-        answer.correct=correct
-        let formData = {
-            id:this.state.game._id,
-            answer:answer
-        }
-        ApiConnector("scoreanswer",JSON.stringify(formData))
+    labelAnswerSheets = () => {
+        this.state.game.answer_basket.forEach(answerSheet => {
+            let teamID = answerSheet.team;
+            this.state.game.scoresheet.forEach( row => {
+                if (row.team._id==teamID) {
+                    answerSheet.team = {
+                        _id:teamID,
+                        team_name:row.team.team_name
+                    }
+                }
+            })
+        })
+        this.setState(this.state)
+    }
+    tickAnswer = (e,a_idx,as_idx) => {
+        console.log(e,a_idx,as_idx,e.target.checked)
+        this.state.game.answer_basket[as_idx].answers[a_idx].correct=e.target.checked
+        this.setState(this.state)
+    }
+    scoreAnswer = answer_idx => {
+        let thisTeam = this.state.game.answer_basket[answer_idx].team
+        this.state.game.scoresheet.forEach(row=>{
+            console.log(row,thisTeam)
+            if (row.team._id==thisTeam._id) {
+                row.answer_sheets.push(this.state.game.answer_basket[answer_idx])
+                this.state.game.answer_basket.splice(answer_idx,1)
+            }
+        })
+        this.setState(this.state)
+        ApiConnector("update",JSON.stringify(this.state.game),"game")
             .then(res=>{
-                this.refreshGame()
-                console.log(res)
+                console.log("Scored Answer")
             })
     }
     changeQuestion = newQ => {
@@ -206,11 +233,9 @@ class App extends Component {
         this.state.game = Object.assign({},this.state.game,{
             current_question:newQ
         })
-       
+        this.setState(this.state)
         ApiConnector("update",JSON.stringify(this.state.game),"game")
             .then(res=>{     
-                this.state.game = Object.assign({},this.state.game,res)
-                this.setState(this.state)
                 this.socket.emit("gamecontrol","refreshdb")
             })
         
@@ -232,7 +257,6 @@ class App extends Component {
         return hash(seed)
     }
     render() {
-
         return pug`
             nav    
                 a(href="#",onClick=this.launchManager) Manage Games
@@ -262,9 +286,15 @@ class App extends Component {
                         updateGame=this.updateGame
                         )
                 if this.state.mode=="play"
+                    WaitingRoom(
+                        waiting_room=this.state.game.waiting_room,
+                        addTeamToSheet=this.addTeamToSheet
+                    )
                     AnswerBasket(
                         answers=this.state.game.answer_basket,
-                        gradeAnswer=this.gradeAnswer
+                        scores=this.state.game.scoresheet,
+                        tickAnswer=this.tickAnswer,
+                        scoreAnswer=this.scoreAnswer
                     )
                     Scoresheet(
                         game=this.state.game,

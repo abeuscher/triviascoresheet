@@ -9,6 +9,13 @@ export default class Scoresheet extends Component {
     checkForUpdate = q => {
         return this.scoreUpdateMap.indexOf(q)>-1
     }
+    getAnswerValue = answers => {
+        let total = 0
+        answers.forEach(a=>{
+            total = total + a.bid
+        })
+        return total
+    }
     getScore = (question,answers) => {
         let output = false;
         answers.forEach(answer => {
@@ -26,9 +33,9 @@ export default class Scoresheet extends Component {
                 h2=this.props.game.game_title
                 h3 Status: In progress
                 h4="Current Question: "+this.props.game.current_question
-                h5="Total Teams: "+ this.props.game.teams.length
+                h5="Total Teams: "+ this.props.game.scoresheet.length
             nav
-                if this.props.game.current_question>1
+                if this.props.game.current_question>0
                     a.previous-question(key="scoresheet-btn-prev-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question-1)}) Previous Question
                 if this.props.game.current_question<20
                     a.next-question(key="scoresheet-btn-next-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question+1)}) Next Question
@@ -44,17 +51,18 @@ export default class Scoresheet extends Component {
                             .answer-box.update(key="scoresheet-header-update-"+c)
                                 p(key="scoresheet-header-update-p-"+c) U
                         - c++
-            for score,score_idx in this.props.game.teams
+            for score,score_idx in this.props.game.scoresheet
                 - c = 1, total = 0;
                 .score-row.flex(key="scoresheet-form-row-"+score_idx)
                     .team-column(key="scoresheet-team-column-"+score_idx)
-                        h2(key="scoresheet-team-label-"+score_idx)=score.team 
+                        h2(key="scoresheet-team-label-"+score_idx)=score.team.team_name
                     while c<21
-                        if this.getScore(c,score.answers)
-                            - let item = this.getScore(c,score.answers)
+                        if this.getScore(c,score.answer_sheets)
+                            - let item = this.getScore(c,score.answer_sheets)
+                            - let bidTotal = this.getAnswerValue(item.answers)
                             .answer-box(key="answer-"+score_idx+"-"+c)
-                                p(key="answer-label-"+score_idx+"-"+c,className=item.correct.toString())=item.bid
-                                - total = total + item.bid                     
+                                p(key="answer-label-"+score_idx+"-"+c,className=item.correct ? "true":"false")=bidTotal
+                                - total = total + bidTotal                   
                         else
                             .answer-box.blank(key="blank-"+score_idx+"-"+c)
                                 p(key="blank-label-"+score_idx+"-"+c)=" "                   
