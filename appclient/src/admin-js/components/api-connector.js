@@ -7,8 +7,8 @@ function apiConnector(action, data, type) {
         create: rootpath + "create/" + type,
         get: rootpath + "get/" + type,
         update: rootpath + "update/" + type,
-        delete: rootpath + "delete/" + type,
-        scoreanswer: rootpath + "scoreanswer/"
+        updateGame: rootpath + "updategame/",
+        delete: rootpath + "delete/" + type
     }
 
     //console.log("API Call: " + paths[action], data, type)

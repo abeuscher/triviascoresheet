@@ -13,30 +13,35 @@ export default class AnswerForm extends Component {
     render() {
         return pug`
         - let game = this.props.game
-        .game-form
+        .answer-form.section-title
             h2=game.game_title
-            h3=game.team_name
-            form.answer-sheet(onSubmit=this.props.submitAnswer)
+        .answer-form
+            h3="Your Team: "+this.props.team.team_name
                 if game.current_question==0
+                    .form-header
                     h4="Game Start Time: " + this.convertDate(game.start_time)
                     p=this.props.instructions[this.props.instructionMap[game.current_question]]
                 else
-                    h4="Current Question: " + game.current_question
-                    p=this.props.instructions[this.props.instructionMap[game.current_question]]
-                    if game.current_question==5 || game.current_question==15
-                        label answers
-                        input(type="text",onChange=e=>{this.props.changeAnswer(e,0)},value=this.props.answer_sheet.answers[0].content)
-                        input(type="text",onChange=e=>{this.props.changeAnswer(e,1)},value=this.props.answer_sheet.answers[1].content)
-                        input(type="text",onChange=e=>{this.props.changeAnswer(e,2)},value=this.props.answer_sheet.answers[2].content)
-                        input(type="text",onChange=e=>{this.props.changeAnswer(e,3)},value=this.props.answer_sheet.answers[3].content)
-                    else
-                        label answer
-                            input(type="text",name="current_answer",onChange=e=>{this.props.changeAnswer(e,0)},value=this.props.answer_sheet.answers[0].content)
-                        label bid
-                            select(onChange=this.props.changeBid)
-                                for bid,idx in this.props.bids
-                                    option(key="bid-option-"+idx,value=bid)=bid
-                    button(onClick=this.props.submitAnswer) Submit Answer
+                    .form-header
+                        h4="Current Question: " + game.current_question
+                        if !this.props.answer_sheet
+                            p Current Question has been answered. Hang tight for the next question.
+                        else
+                            p=this.props.instructions[this.props.instructionMap[game.current_question]]
+                    if this.props.answer_sheet
+                        if game.current_question==5 || game.current_question==15
+                            for answer,answer_idx in this.props.answer_sheet.answers
+                                label(key="label-" + answer_idx)="answer " + (answer_idx+1)
+                                    input(key="answer-" + answer_idx,type="text",onChange=e=>{this.props.changeAnswer(e,answer_idx)},value=this.props.answer_sheet.answers[answer_idx].content)
+                        else
+                            label answer
+                                input(type="text",name="current_answer",onChange=e=>{this.props.changeAnswer(e,0)},value=this.props.answer_sheet.answers[0].content)
+                            label bid
+                                select(onChange=this.props.changeBid)
+                                    option(value="")
+                                    for bid,idx in this.props.bids
+                                        option(key="bid-option-"+idx,value=bid)=bid
+                        a.button(onClick=this.props.submitAnswer) Submit Answer
         `
     }
 }

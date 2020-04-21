@@ -8,15 +8,17 @@ $font-path:"/fonts/";
 //colors
 $black:#000;
 $white:#fff;
-$off-white:#d2dce6;
+$off-white:#f6f6f6;
 $off-black:#031921;
 
 $dark-green:#2f7d35;
 $sea-green:#2c7873;
 $light-green:#6fb98f;
 $yellow:#ffd800;
+$blue:#1a3245;
+$red:#8b0416;
 
-$body-bg-color:linear-gradient(to bottom, rgb(114, 172, 143) 0%, rgb(171, 202, 153) 63%, rgb(216, 219, 166) 83%, rgb(240, 228, 172) 100%);
+$body-bg-color:linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(219,5,5,1) 100%);
 
 $body-text-color:$off-black;
 $body-link-color:$black;

@@ -1,0 +1,9 @@
+.signup-form {
+    padding:$gutter-width/2 $gutter-width;
+    text-align:center;
+    input {
+        display:block;
+        min-width:50%;
+        margin:0 auto 1em;
+    }
+}

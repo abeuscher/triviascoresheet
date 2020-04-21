@@ -1,3 +1,7 @@
+@mixin nice-transition() {
+	transition: 0.4s cubic-bezier(0.335, 0.815, 0.470, 1);
+}
+
 @mixin list-to-menu($ul-margin: 0, $ul-padding: 0) {
   list-style: none;
   margin: $ul-margin;

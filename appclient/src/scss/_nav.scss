@@ -1,38 +1,49 @@
-nav {
-    padding:$gutter-width;
-    button {
-        padding:.5em 1.5em;
-        margin-right:.5em;
-        border-radius:3px;
-        border:none;
-        background:$dark-green;
-        color:$yellow;
-        &:hover {
-            background:$light-green;
-        }
+.admin-controls {
+    padding:.5em;
+    .button {
+        margin-right:1em;
     }
-    .radio-chooser {
-        display: inline-block;
-        text-align: center;
-        p {
-            display:inline-block;
-        }
-        .radio-option {
-            display:inline-block;
-            input[type="radio"] {
-                display:none;
-                &:checked {
-                    +label {
-                        font-weight:bold;
-                    }
+}
+.game-controls {
+    display:flex;
+    flex-wrap:wrap;
+    .info-block {
+        flex-basis:50%;
+        background:$off-black;
+        color:$white;
+        display:flex;
+        flex-wrap:wrap;
+        .item {
+            flex-basis:100%;
+            display:flex;
+            .label {
+                flex-basis:25%;
+                text-align:right;
+                text-transform:uppercase;
+                color:$blue;
+                &:after {
+                    content:':';
                 }
             }
-            label {
-                text-transform:uppercase;
-                font-size:1em;
-                margin:0 1em;
-                cursor:pointer;
+            .value {
+                flex-basis:75%;
+                color:$black;
+                text-indent: 1em;
+                font-weight: bold;
             }
+            background:$white;
+            color:$blue;
+            padding:.5em 2.5%;
+
+        }
+    }
+    .game-buttons {
+        flex-basis:50%;
+        background:$off-white;
+        display:flex;
+        flex-direction:column;
+        h2, .button {
+            margin:0 1em .5em;
         }
     }
 }

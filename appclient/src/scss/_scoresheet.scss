@@ -1,21 +1,19 @@
 .scoresheet {
     .flex {
-        display:flex;
+        display: flex;
     }
     .team-column {
         flex-basis: 20%;
     }
-    nav {
-        display: block;
-        margin-bottom: 10px;
-        a {
-            display: inline-block;
-            padding: 0.5em 1em;
-            background: gray;
-            color: white;
-            border-radius: 3px;
-            margin-right: 1em;
-            text-decoration: none;
+    .score-row {
+        .answer-box {
+            @include nice-transition();
+            &:not(.blank):not(.update) {
+                &:hover {
+                    background: lighten($blue, 40%);
+                    cursor: pointer;
+                }
+            }
         }
     }
     .answer-box {

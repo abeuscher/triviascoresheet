@@ -19,40 +19,6 @@ const mongoose = require('mongoose');
 
 function AppSchemas() {
     return {
-        "answer_sheet": {
-            game: {
-                ref: "game",
-                type: mongoose.Schema.Types.ObjectId
-            },
-            team: {
-                ref: "team",
-                type: mongoose.Schema.Types.ObjectId
-            },
-            q: {
-                type: Number
-            },
-            graded: {
-                type: Boolean,
-                default: false
-            },
-            answers: [{
-                content: {
-                    type: String,
-                    default: "BLANK"
-                },
-                bid: {
-                    type: Number
-                },
-                correct: {
-                    type: Boolean,
-                    default: false
-                }
-            }],
-            created: {
-                type: Date,
-                default: Date.now
-            }
-        },
         "team": {
             team_name: {
                 type: String
@@ -90,6 +56,10 @@ function AppSchemas() {
             game_title: {
                 type: String
             },
+            game_status: {
+                type: String,
+                default: "new"
+            },
             game_description: {
                 type: String
             },
@@ -102,14 +72,62 @@ function AppSchemas() {
                     ref: "team",
                     type: mongoose.Schema.Types.ObjectId
                 },
-                answer_sheets: [{
-                    ref: "answer_sheet",
-                    type: mongoose.Schema.Types.ObjectId
+                scored_sheets: [{
+                    q: {
+                        type: Number
+                    },
+                    status: {
+                        type: String,
+                        default: "unsubmitted"
+                    },
+                    answers: [{
+                        content: {
+                            type: String
+                        },
+                        bid: {
+                            type: Number
+                        },
+                        correct: {
+                            type: Boolean,
+                            default: false
+                        }
+                    }],
+                    created: {
+                        type: Date,
+                        default: Date.now
+                    }
                 }]
             }],
             answer_basket: [{
-                ref: "answer_sheet",
-                type: mongoose.Schema.Types.ObjectId
+                team: {
+                    ref: "team",
+                    type: mongoose.Schema.Types.ObjectId
+                },
+                answer_sheet: {
+                    q: {
+                        type: Number
+                    },
+                    status: {
+                        type: String,
+                        default: "unsubmitted"
+                    },
+                    answers: [{
+                        content: {
+                            type: String
+                        },
+                        bid: {
+                            type: Number
+                        },
+                        correct: {
+                            type: Boolean,
+                            default: false
+                        }
+                    }],
+                    created: {
+                        type: Date,
+                        default: Date.now
+                    }
+                }
             }],
             created: {
                 type: Date,

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
-import IntroForm from './components/intro-form'
+import SignupForm from './components/signup-form'
 import AnswerForm from './components/answer-form'
 
 import ApiConnector from './components/api-connector'
@@ -34,7 +34,6 @@ class App extends Component {
         this.makeSocketConnection()
 
         if (saveState) {
-            this.state.current_answer_sheet = this.makeBlankAnswerSheet()
             this.refreshGame()
         }
         if (this.state.mode == "fresh") {
@@ -61,7 +60,7 @@ class App extends Component {
     handleGameControl = data => {
         console.log("Game Control:", data)
         if (data == "refreshdb") {
-            this.state.mode="active"
+            this.state.mode = "active"
             this.setState(this.state)
             this.refreshGame();
         }
@@ -76,22 +75,44 @@ class App extends Component {
             team_name: ""
         },
         game: null,
-        current_answer_sheet:null,
-        bids:[1,3,5,7],
+        current_answer_sheet: null,
+        bids: [1, 3, 5, 7],
         answer_history: []
     }
-    makeBlankAnswerSheet = () => {
-        let answers = [5,15].indexOf(this.state.game.current_question) > -1 ? [this.blankAnswer,this.blankAnswer,this.blankAnswer,this.blankAnswer] : [this.blankAnswer]
+    makeBlankAnswerSheet = qnum => {
+        let answers = [this.blankAnswer(null)]
+        if (qnum==5) {
+            answers = [this.blankAnswer(2),this.blankAnswer(2),this.blankAnswer(2),this.blankAnswer(2)]
+        }
+        if (qnum==15) {
+            answers = [this.blankAnswer(5),this.blankAnswer(5),this.blankAnswer(5),this.blankAnswer(5)]
+        }
         return {
-            game: this.state.game._id,
-            team: this.state.team._id,
             q: this.state.game.current_question,
             answers: answers
         }
     }
-    blankAnswer = {
-        content:"",
-        bid:null
+    bidRefreshMap = {
+        4: [1, 3, 5, 7],
+        9: [2, 4, 6, 8],
+        14: [2, 4, 6, 8],
+    }
+    bidManager = usedBid => {
+        let splicePoint = this.state.bids.indexOf(usedBid)
+        if (splicePoint > -1) {
+            this.state.bids.splice(splicePoint, 1)
+            this.setState(this.state)
+            if (this.state.bids.length == 0) {
+                this.state.bids = this.bidRefreshMap[this.state.current_question]
+                this.setState(this.state)
+            }
+        }
+    }
+    blankAnswer = bid => {
+        return {
+            content: "",
+            bid: bid
+        }
     }
     instructionStrings = [
         "Game has not yet started. Hold tight.",
@@ -136,7 +157,6 @@ class App extends Component {
         else {
             ApiConnector("read", JSON.stringify({ game_code: url_hash }), "game")
                 .then(res => {
-                    console.log(res)
                     if (res.length == 1) {
                         this.state.game = Object.assign({}, this.state.game, res[0])
                         this.setState(this.state)
@@ -172,12 +192,11 @@ class App extends Component {
     handleIntroFormSubmit = e => {
         ApiConnector("addTeam", JSON.stringify({ _id: this.state.game._id, team: { team_name: this.state.team.team_name } }))
             .then(res => {
-                console.log(res)
                 if (res._id) {
                     this.state.mode = "active"
                     this.state.team = res
                     this.setState(this.state)
-                    this.checkForAnswerSheet()
+                    this.newAnswerSheet()
                 }
                 else {
                     this.state.error = "Problem signing in to game"
@@ -192,28 +211,25 @@ class App extends Component {
             .then(res => {
                 this.state.game = Object.assign({}, this.state.game, res)
                 this.setState(this.state)
-                this.checkForAnswerSheet()
+                this.newAnswerSheet()
             })
     }
-    checkForAnswerSheet = () => {
-        if (this.state.current_answer_sheet==null && this.state.game.current_question>0) {
-            this.state.current_answer_sheet= this.makeBlankAnswerSheet()
-            this.setState(this.state)
-            console.log(this.state)
-        }
+    newAnswerSheet = () => {
+        this.state.current_answer_sheet = this.makeBlankAnswerSheet(this.state.game.current_question)
+        this.setState(this.state)
     }
     handleAnswerSubmit = e => {
         e.preventDefault()
-        let formData = this.state.current_answer_sheet
-        formData.team = this.state.team
+        let formData = { gameid:this.state.game._id,teamid: this.state.team._id, answer_sheet: this.state.current_answer_sheet }
         ApiConnector("submitAnswer", JSON.stringify(formData))
             .then(res => {
-                this.state.answer_history.push(res)
-                this.state.current_answer_sheet=this.makeBlankAnswerSheet()
+                this.bidManager(this.state.current_bid)
+                this.state.answer_history = res.data
+                this.state.current_answer_sheet = null
                 this.setState(this.state)
                 this.socket.emit("clientmsg", "answerdropped")
+                console.log("Answer submitted", res);
             })
-        console.log("Answer submitted");
     }
     changeAnswer = (e, numAnswer) => {
         e.preventDefault()
@@ -227,27 +243,29 @@ class App extends Component {
     render() {
 
         return pug`
-            if this.state.error!=""
-                h2.error=this.state.error
-            else
-                if this.state.mode=="fresh"
-                    IntroForm(
-                        game=this.state.game,
-                        team=this.state.team,
-                        onChange=this.handleFormChange,
-                        onSubmit=this.handleIntroFormSubmit
+            #wrapper
+                if this.state.error!=""
+                    h2.error=this.state.error
+                else
+                    if this.state.mode=="fresh"
+                        SignupForm(
+                            game=this.state.game,
+                            team=this.state.team,
+                            onChange=this.handleFormChange,
+                            onSubmit=this.handleIntroFormSubmit
+                            )
+                    if this.state.mode=="active" || this.state.mode=="waiting"
+                        AnswerForm(
+                            game=this.state.game,
+                            team=this.state.team,
+                            answer_sheet=this.state.current_answer_sheet,
+                            bids=this.state.bids,
+                            submitAnswer=this.handleAnswerSubmit,
+                            instructions=this.instructionStrings,
+                            instructionMap=this.instructionMap,
+                            changeAnswer=this.changeAnswer,
+                            changeBid=this.changeBid
                         )
-                if this.state.mode=="active"
-                    AnswerForm(
-                        game=this.state.game,
-                        answer_sheet=this.state.current_answer_sheet,
-                        bids=this.state.bids,
-                        submitAnswer=this.handleAnswerSubmit,
-                        instructions=this.instructionStrings,
-                        instructionMap=this.instructionMap,
-                        changeAnswer=this.changeAnswer,
-                        changeBid=this.changeBid
-                    )
             
         `
     }

@@ -1,0 +1,25 @@
+.button {
+    display:inline-block;
+    border:none;
+    padding:.5em 1.5em;
+    background:lighten($blue,10%);
+    color:$white;
+    
+    text-decoration:none;
+    text-align:center;
+    @include nice-transition();
+    &:hover {
+        background:$blue;
+        color:$white;
+        cursor:pointer;
+    }
+    &.small {
+        font-size:.8em;
+    }
+    &.delete {
+        background:$red;
+        &:hover {
+            background:lighten($red,10%);
+        }
+    }
+}

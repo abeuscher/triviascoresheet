@@ -1,0 +1,44 @@
+.answer-form {
+    &.section-title {
+        background:$black;
+        text-align:center;
+        h2 {
+            color:$white;
+        }
+    }
+    padding:$gutter-width/2 $gutter-width;
+    label, input, select {
+        display:block;
+    }
+    label {
+        width:50%;
+        margin:0 25%;
+    }
+    input, select {
+        width:100%;  
+        border:0;
+        padding:.25em 0;
+        outline:none;    
+        font-size:1.4em;
+        line-height:2; 
+        border:1px solid $black;
+    }
+    input {
+        text-indent:.5em;
+    }
+    select {
+        font-size:2em;
+    }
+    label {
+        text-transform:uppercase;
+        font-size:.8em;
+        input[type="text"], select {
+            margin-bottom:1em;
+        }
+    }
+    .button {
+        width:50%;
+        margin:0 25%;
+        padding:1em 0;
+    }
+}

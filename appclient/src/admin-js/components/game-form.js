@@ -13,11 +13,12 @@ export default class GameForm extends Component {
 
     render() {
         return pug`
-            form(method="post")
+            .game-entry-form.padded-column.section-title
                 if this.props.mode=="create"
-                    h3 Create New Game:
+                    h2 Create New Game:
                 else 
-                    h3="Edit Record id#"+this.props.game._id            
+                    h2="Edit Record id#"+this.props.game._id   
+            .game-entry-form.padded-column         
                 label(for="game_title") Title for Game
                     input(type="text",name="game_title",value=this.props.game.game_title,onChange=this.props.onFieldChange)
                 label(for="num_questions") Number of Questions
@@ -30,7 +31,7 @@ export default class GameForm extends Component {
                 if this.props.mode=="create"
                     button(onClick=this.props.createGame) Create Game
                 else
-                    button(onClick=this.props.updateGame) Update Game
+                    button(onClick=this.props.saveGame) Save Changes
                     button(onClick=this.props.deleteGame) Delete Game
         `
     }

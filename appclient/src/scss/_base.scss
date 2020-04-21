@@ -22,9 +22,43 @@ h5,
 h6 {
   font-family: $header-font;
 }
-#wrapper {
+#admin-app, #player-app {
   width:90%;
   max-width:800px;
   margin:0 auto;
+}
+#wrapper {
+
   background:$off-white;
+}
+
+.flex {
+  display:flex;
+  flex-wrap:wrap;
+  &.nowrap {
+    flex-wrap:nowrap;
+  }
+  .column {
+    flex-basis:100%;
+    @include bp(m) {
+      &.half {
+        flex-basis:50%;
+      }
+      &.quarter {
+        flex-basis:25%;
+      }
+      &.three-quarter {
+        flex-basis:75%;
+      }
+      &.fifth {
+        flex-basis:20%;
+      }
+      &.two-fifth {
+        flex-basis:40%;
+      }
+      &.three-fifth {
+        flex-basis:60%;
+      }
+    }
+  }
 }

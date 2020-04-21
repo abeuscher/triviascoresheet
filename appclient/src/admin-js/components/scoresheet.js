@@ -12,7 +12,7 @@ export default class Scoresheet extends Component {
     getAnswerValue = answers => {
         let total = 0
         answers.forEach(a=>{
-            total = total + a.bid
+            total = a.correct ? total + a.bid : total
         })
         return total
     }
@@ -27,50 +27,78 @@ export default class Scoresheet extends Component {
     }
     render() {
         return pug`
-        - let c = 1, total=0
+        - let theCount = Array.apply(null, Array(20)), total=0
         .scoresheet
-            header
-                h2=this.props.game.game_title
-                h3 Status: In progress
-                h4="Current Question: "+this.props.game.current_question
-                h5="Total Teams: "+ this.props.game.scoresheet.length
-            nav
-                if this.props.game.current_question>0
-                    a.previous-question(key="scoresheet-btn-prev-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question-1)}) Previous Question
-                if this.props.game.current_question<20
-                    a.next-question(key="scoresheet-btn-next-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question+1)}) Next Question
-                a.start-timer(key="scoresheet-btn-start-timer",href="#") Start One Minute Timer
+            .padded-column.section-title
+                h2 Scoresheet        
             .scoresheet-header(key="scoresheet-header")
                 .scoresheet-header-row.flex(key="scoresheet-header-row")
                     .team-column(key="scoresheet-team-name-header")
                         p(key="scoresheet-team-name-header-label") Team Name
-                    while c<21
+                    each i,idx in theCount
+                        - let c = idx + 1
                         .answer-box(key="scoresheet-header-"+c)
                             p(key="scoresheet-header-p-"+c)=c
                         if this.checkForUpdate(c)
                             .answer-box.update(key="scoresheet-header-update-"+c)
                                 p(key="scoresheet-header-update-p-"+c) U
-                        - c++
-            for score,score_idx in this.props.game.scoresheet
-                - c = 1, total = 0;
-                .score-row.flex(key="scoresheet-form-row-"+score_idx)
-                    .team-column(key="scoresheet-team-column-"+score_idx)
-                        h2(key="scoresheet-team-label-"+score_idx)=score.team.team_name
-                    while c<21
-                        if this.getScore(c,score.answer_sheets)
-                            - let item = this.getScore(c,score.answer_sheets)
+            for row,row_idx in this.props.game.scoresheet
+                - let total = 0;
+                .score-row.flex(key="scoresheet-form-row-"+row_idx)
+                    .team-column(key="scoresheet-team-column-"+row_idx)
+                        h2(key="scoresheet-team-label-"+row_idx)=row.team.team_name
+                    each i,idx in theCount
+                        - let c = idx + 1
+                        if this.getScore(c,row.scored_sheets)
+                            - let item = this.getScore(c,row.scored_sheets)
                             - let bidTotal = this.getAnswerValue(item.answers)
-                            .answer-box(key="answer-"+score_idx+"-"+c)
-                                p(key="answer-label-"+score_idx+"-"+c,className=item.correct ? "true":"false")=bidTotal
-                                - total = total + bidTotal                   
+                            if c!=5 && c!=15
+                                AnswerBox(
+                                    key="answer-box-normal-"+row_idx+"-"+c,
+                                    sheet=JSON.stringify(item),
+                                    onClick=this.props.sendToBasket,
+                                    labelClass=item.answers[0].correct ? "true" : "false",
+                                    cellValue=item.answers[0].bid
+                                    )
+                                - total = item.answers[0].correct ? total + bidTotal : total
+                            else
+                                AnswerBox(
+                                    key="answer-box-fourpart-"+row_idx+"-"+c,
+                                    sheet=JSON.stringify(item),
+                                    onClick=this.props.sendToBasket,
+                                    cellValue=bidTotal
+                                    )
+                                - total = total + bidTotal                  
                         else
-                            .answer-box.blank(key="blank-"+score_idx+"-"+c)
-                                p(key="blank-label-"+score_idx+"-"+c)=" "                   
+                            AnswerBox(
+                                key="answer-box-blank-"+row_idx+"-"+c,
+                                cellValue=" ",
+                                extraClass="blank"
+                                )                
                         if this.checkForUpdate(c)
                             - let cellVal = c<=this.props.game.current_question ? total : "U"
-                            .answer-box.update(key="update-"+score_idx+"-"+c)
-                                p(key="update-label-"+score_idx+"-"+c)=cellVal 
-                        - c++                     
+                            AnswerBox(
+                                key="answer-box-update-"+row_idx+"-"+c,
+                                cellValue=cellVal,
+                                extraClass="update"
+                                )                
         `
     }
+}
+class AnswerBox extends Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        return pug`
+            .answer-box(
+                className=this.props.extraClass || "",
+                onClick=this.props.onClick || null,
+                data-item=this.props.sheet || ""
+                )
+                p(
+                    className=this.props.labelClass || "",
+                    )=this.props.cellValue   
+        `
+    }  
 }
