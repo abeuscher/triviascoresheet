@@ -352,6 +352,9 @@ io.on('connection', (socket) => {
     socket.on("host message", (msg) => {
         console.log('message: ' + msg);
     });
+    socket.on("playermessage", (msg) => {
+        io.broadcast.emit("playermessage",msg)
+    });
     socket.on("clientmsg", msg => {
         if (host) {
             host.emit("clientmsg", msg)
@@ -362,6 +365,10 @@ io.on('connection', (socket) => {
         host.on("gamecontrol", (msg) => {
             io.emit("gamecontrol", msg);
         });
+        host.on("hostmessage", (msg) => {
+            io.emit("hostmessage", msg);
+        });
+
     })
 
     socket.on('disconnect', () => {

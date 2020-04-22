@@ -26,23 +26,6 @@ class App extends Component {
         let saveState = this.getLocalStorage()
         this.state = saveState ? saveState : this.defaultState
         this.makeSocketConnection()
-
-        if (saveState) {
-            this.refreshGame()
-        }
-        if (this.state.mode=="fromlobby") {
-            this.state.mode="noteam"
-            this.getUser()
-            this.refreshGame()
-        }
-        if (this.state.mode="noteam") {
-            this.getUser()
-        }
-        if (this.state.mode == "fromurl") {
-            this.getUser()
-            this.initGameFromHash()
-        }
-
     }
     checkForUser = () => {
         if (window.sessionStorage.getItem("userstate") == undefined) {
@@ -91,8 +74,19 @@ class App extends Component {
         this.socket.on("gamecontrol", msg => {
             this.handleGameControl(msg)
         })
+        this.socket.on("playerchat", msg => {
+            this.addPlayerMessage(msg)
+        })
+        this.socket.on("hostchat", msg => {
+            this.addHostMessage(msg)
+        })
     }
-
+    addPlayerMessage = msg => {
+        this.state.messages.player.push("plain",msg)
+    }
+    addHostMessage = msg => {
+        this.state.messages.host.push("plain",msg)
+    }
     handleGameControl = msg => {
         console.log("Game Control:", msg)
         if (msg == "refreshdb") {
@@ -117,6 +111,20 @@ class App extends Component {
         this.state.messages.push({className:className,msg:msg})
         this.setState(this.state)
     }
+    componentDidMount() {
+        if (this.state.mode=="fromlobby") {
+            this.state.mode="noteam"
+            this.getUser()
+            this.refreshGame()
+        }
+        if (this.state.mode="noteam") {
+            this.getUser()
+        }
+        if (this.state.mode == "fromurl") {
+            this.getUser()
+            this.initGameFromHash()
+        }
+    }
     componentDidUpdate() {
         this.setLocalStorage()
     }
@@ -131,10 +139,15 @@ class App extends Component {
         current_answer_sheet: null,
         current_bid:1,
         bids: [1, 3, 5, 7],
-        messages:[{
-            className:"intro",
-            msg:"Welcome to the Game!"
-        }]
+        messages: {
+            current_message:"",
+            app: [{
+                className: "intro",
+                msg: "Welcome to the Game!"
+            }],
+            host: [],
+            player: []
+        }
     }
     makeBlankAnswerSheet = qnum => {
         let answers = [this.blankAnswer(null)]
@@ -239,7 +252,22 @@ class App extends Component {
         this.state.team[e.target.name] = e.target.value
         this.setState(this.state);
     }
-
+    handleMessageChange = e => {
+        this.state.messages.current_message=e.target.value
+        this.setState(this.state)
+    }
+    messageHost = () => {
+        this.socket.emit("clientmsg",this.state.current_message)
+        this.state.current_message=""
+        this.setState(this.state)
+    }
+    
+    messagePlayers = () => {
+        this.socket.emit("playerchat",this.state.user.username+": " +this.state.current_message)
+        this.state.current_message=""
+        this.setState(this.state)
+    }
+    
     handleIntroFormSubmit = e => {
         ApiConnector("addTeam", JSON.stringify({ _id: this.state.game._id, team: { team_name: this.state.team.team_name, users:[this.state.user] } }))
             .then(res => {
@@ -334,7 +362,10 @@ class App extends Component {
                             changeBid=this.changeBid
                         )
                     ChatBox(
-                        messages=this.state.messages
+                        messages=this.state.messages,
+                        changeMessage=this.handleMessageChange,
+                        messageHost=this.messageHost,
+                        messagePlayers=this.messagePlayers
                     )
             
         `

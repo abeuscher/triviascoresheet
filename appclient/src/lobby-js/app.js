@@ -37,10 +37,15 @@ class App extends Component {
         current_answer_sheet: null,
         current_bid: 1,
         bids: [1, 3, 5, 7],
-        messages: [{
-            className: "intro",
-            msg: "Welcome to the Game!"
-        }]
+        messages: {
+            current_message:"",
+            app: [{
+                className: "intro",
+                msg: "Welcome to the Game!"
+            }],
+            host: [],
+            player: []
+        }
     }
     componentDidMount() {
         this.fetchGames()
@@ -83,14 +88,14 @@ class App extends Component {
             .then(res => {
                 let gameState = Object.assign({}, this.defaultGameState, { game: res })
                 window.sessionStorage.setItem("gamestate", JSON.stringify(gameState));
-                location.href="/"
+                location.href = "/"
             })
     }
     logout = () => {
         window.sessionStorage.removeItem("userstate")
         this.state.user = {}
         this.setState(this.state)
-        location.href="login.html"
+        location.href = "login.html"
     }
     render() {
 
