@@ -40,6 +40,7 @@ let server = app.listen(5000, () => {
 
         try {
             let thisGame = await thisGameModel.findById(request.body.gameid).exec()
+            request.body.answer_sheet.status="answer_basket"
             thisGame.answer_basket.push({ team: request.body.teamid, answer_sheet: request.body.answer_sheet })
             thisGame.save()
             let thisRow = thisGame.scoresheet.filter(row => {
@@ -103,6 +104,16 @@ let server = app.listen(5000, () => {
     app.post('/game/', cors(corsOptions), async (request, response) => {
         let thisGameModel = models["game"];
         if (request.body.id && request.body.teamid) {
+            try {
+                 let thisGame = await thisGameModel.findById(request.body.id)
+                    .populate({path: "scoresheet.team", match:{_id:request.body.teamid}})
+                    .exec();   
+                response.send(thisGame ? thisGame : { error: "not found" });                 
+            }catch (e) {
+                console.log("Error on get game plus team", e)
+                response.json({ err: "Error on Get Game Plus Team", msg: e })
+            }
+
 
         }
         else if (request.body.id) {

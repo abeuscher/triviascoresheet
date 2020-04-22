@@ -208,9 +208,13 @@ class App extends Component {
         ApiConnector("read", JSON.stringify(formData))
             .then(res => {
                 if (res._id) {
+                    console.log("Refresh:",res)
                     this.state.game = res
                     this.setState(this.state)
                     this.newAnswerSheet()
+                }
+                else {
+                    console.log(res)
                 }
             })
     }

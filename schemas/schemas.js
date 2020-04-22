@@ -19,6 +19,33 @@ const mongoose = require('mongoose');
 
 function AppSchemas() {
     return {
+        "user":{
+            email:{
+                type:String,
+                unique:true,
+                lowercase:true
+            },
+            pasw:{
+                type:String
+            },
+            display_name:{
+                type:String
+            },
+            privileges:[{
+                "admin": {
+                    type:Boolean,
+                    default:false
+                },
+                "host": {
+                    type:Boolean,
+                    default:false
+                },
+                "player":{
+                    type:Boolean,
+                    default:true
+                }
+            }]
+        },
         "team": {
             team_name: {
                 type: String
@@ -87,6 +114,9 @@ function AppSchemas() {
                         bid: {
                             type: Number
                         },
+                        scored: {
+                            type: Number
+                        },
                         correct: {
                             type: Boolean,
                             default: false
@@ -116,6 +146,9 @@ function AppSchemas() {
                             type: String
                         },
                         bid: {
+                            type: Number
+                        },
+                        scored: {
                             type: Number
                         },
                         correct: {

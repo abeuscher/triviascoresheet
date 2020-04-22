@@ -223,7 +223,8 @@ class App extends Component {
         this.state.game.scoresheet.forEach(row => {
             console.log("This Answer Sheet:", this.state.game.answer_basket[answer_idx])
             if (row.team._id == thisTeam._id) {
-                row.scored_sheets.push(this.state.game.answer_basket[answer_idx].answer_sheet)
+                let thisAnswer = Object.assign({},this.state.game.answer_basket[answer_idx].answer_sheet,{status:"scored"})
+                row.scored_sheets.push(thisAnswer)
                 this.state.game.answer_basket.splice(answer_idx, 1)
             }
         })
@@ -244,7 +245,7 @@ class App extends Component {
         else {
             answerSheet = JSON.parse(e.target.getAttribute("data-item"))
         }
-
+        answerSheet.status="answer_basket"
         this.state.game.scoresheet.forEach((row,idx)=>{
             row.scored_sheets.forEach((sheet,sheet_idx)=>{
                 if (sheet._id==answerSheet._id) {

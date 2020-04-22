@@ -32,7 +32,6 @@ export default class AnswerForm extends Component {
                         else
                             p=this.props.instructions[this.props.instructionMap[game.current_question]]
                     if this.props.answer_sheet && this.props.bids
-                        - console.log(this.props.answer_sheet,this.props.bids)
                         if game.current_question==5 || game.current_question==15
                             for answer,answer_idx in this.props.answer_sheet.answers
                                 label(key="label-" + answer_idx)="answer " + (answer_idx+1)
