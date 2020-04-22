@@ -5,6 +5,7 @@ var jsSrcDir = srcDir + "js/";
 var jsBuildDir = buildDir + "js/";
 
 var adminjsSrcDir = srcDir + "admin-js/";
+var loginjsSrcDir = srcDir + "login-js/";
 
 var sassSrcDir = srcDir + "scss/";
 var sassBuildDir = buildDir + "css/";
@@ -35,6 +36,13 @@ function siteSettings() {
         buildDir: jsBuildDir,
         buildFileName: "admin-bundle.js"
       },
+      {
+        name: "Login Bundle",
+        srcDir: loginjsSrcDir,
+        srcFileName: "app.js",
+        buildDir: jsBuildDir,
+        buildFileName: "login-bundle.js"
+      }
     ],
     templates: [
       {

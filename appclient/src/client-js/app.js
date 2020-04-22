@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
-import SignupForm from './components/signup-form'
+import GameSigninForm from './components/game-signin-form'
 import AnswerForm from './components/answer-form'
 
 import ApiConnector from './components/api-connector'
@@ -253,7 +253,7 @@ class App extends Component {
                     h2.error=this.state.error
                 else
                     if this.state.mode=="fresh"
-                        SignupForm(
+                        GameSigninForm(
                             game=this.state.game,
                             team=this.state.team,
                             onChange=this.handleFormChange,

@@ -50,6 +50,10 @@ function AppSchemas() {
             team_name: {
                 type: String
             },
+            users:[{
+                ref:"user",
+                type: mongoose.Schema.Types.ObjectId
+            }],
             created: {
                 type: Date,
                 default: Date.now
