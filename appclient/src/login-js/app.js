@@ -21,11 +21,11 @@ class App extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            view:"login", // login, signup, getpw
+            view:"login", // login, signup, changepw
             creds: {
                 username:"",
-                pas:"",
-                pas2:""
+                pasw:"",
+                pasw2:""
             },
             error:""
         }
@@ -39,7 +39,7 @@ class App extends Component {
         this.setState(this.state)
     }
     checkForm = () => {
-        if (this.state.creds.username==""||this.state.creds.pas=="") {
+        if (this.state.creds.username==""||this.state.creds.pasw=="") {
             this.showError("Please enter both username and password to continue. If you don't mind. Is this your first time logging in to something?")
             return false;
         }        
@@ -54,6 +54,15 @@ class App extends Component {
         this.setState(this.state)   
         setTimeout(flashError,5000)     
     }
+    showMessage = msg => {
+        const flashMessage = () => { 
+            this.state.message=""
+            this.setState(this.state)
+        }
+        this.state.message=msg
+        this.setState(this.state)   
+        setTimeout(flashMessage,5000)     
+    }
     login = e => {
         if (this.checkForm) {
             ApiConnector("login",JSON.stringify(this.state.creds))
@@ -66,12 +75,17 @@ class App extends Component {
         if (this.checkForm) {
             ApiConnector("signup",JSON.stringify(this.state.creds))
                 .then(res=>{
-                    console.log(res)
+                    if (res._id) {
+                        console.log("Success ready to route to app.")
+                    }
+                    else {
+                        console.log(res)
+                    }
                 })
         }  
     }
     resetpw = e => {
-        if (this.state.creds.pas!=this.state.creds.pas2 || this.state.creds.pas=="" || this.state.creds.pas2=="") {
+        if (this.state.creds.pasw!=this.state.creds.pasw2 || this.state.creds.pasw=="" || this.state.creds.pasw2=="") {
             this.showError("Please make sure you entered two matching passwords. Blanks are not accepted. Because blank is not a password. It is the absence of a password.")
             return false;
         }  
@@ -79,12 +93,28 @@ class App extends Component {
     render() {
 
         return pug`
+            
             .login-bucket
-                if this.state.view=="login"
-                    LoginForm(creds=this.state.creds)
-                else if this.state.view=="signup"
-
-                else if this.state.view=="getpw"
+                if this.state.view=="signup"
+                    SignupForm(
+                        creds=this.state.creds,
+                        signup=this.signup,
+                        changeView=this.changeView,
+                        onChange=this.changeField
+                        )
+                else if this.state.view=="changepw"
+                    RetrievePasswordForm(                        
+                        creds=this.state.creds,
+                        changeView=this.changeView,
+                        onChange=this.changeField
+                        )
+                else
+                    LoginForm(
+                        creds=this.state.creds,
+                        login=this.login,
+                        changeView=this.changeView,
+                        onChange=this.changeField
+                        )                        
                 .error-box
                     p=this.state.error
         `

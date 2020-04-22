@@ -1,4 +1,10 @@
-extends ./inc/admin-page
+extends ./inc/page
+
+block css
+  link(href="css/admin.css",type="text/css",rel="stylesheet")
 
 block content
   #admin-app
+
+block script
+  script(src='js/admin-bundle.js')

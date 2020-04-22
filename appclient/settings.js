@@ -1,7 +1,7 @@
 var srcDir = "./src/";
 var buildDir = "./public_html/";
 
-var jsSrcDir = srcDir + "js/";
+var jsSrcDir = srcDir + "client-js/";
 var jsBuildDir = buildDir + "js/";
 
 var adminjsSrcDir = srcDir + "admin-js/";

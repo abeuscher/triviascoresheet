@@ -1,6 +1,7 @@
 const Express = require("express");
 const BodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 const cors = require("cors");
 
 
@@ -40,13 +41,13 @@ let server = app.listen(5000, () => {
 
         try {
             let thisGame = await thisGameModel.findById(request.body.gameid).exec()
-            request.body.answer_sheet.status="answer_basket"
+            request.body.answer_sheet.status = "answer_basket"
             thisGame.answer_basket.push({ team: request.body.teamid, answer_sheet: request.body.answer_sheet })
             thisGame.save()
             let thisRow = thisGame.scoresheet.filter(row => {
                 return row.team.id == request.body.teamid
             })
-            response.json({msg:"success",data:thisRow})
+            response.json({ msg: "success", data: thisRow })
         }
         catch (e) {
             response.json({ res: "Error on answer submitted", msg: e })
@@ -105,11 +106,11 @@ let server = app.listen(5000, () => {
         let thisGameModel = models["game"];
         if (request.body.id && request.body.teamid) {
             try {
-                 let thisGame = await thisGameModel.findById(request.body.id)
-                    .populate({path: "scoresheet.team", match:{_id:request.body.teamid}})
-                    .exec();   
-                response.send(thisGame ? thisGame : { error: "not found" });                 
-            }catch (e) {
+                let thisGame = await thisGameModel.findById(request.body.id)
+                    .populate({ path: "scoresheet.team", match: { _id: request.body.teamid } })
+                    .exec();
+                response.send(thisGame ? thisGame : { error: "not found" });
+            } catch (e) {
                 console.log("Error on get game plus team", e)
                 response.json({ err: "Error on Get Game Plus Team", msg: e })
             }
@@ -134,11 +135,81 @@ let server = app.listen(5000, () => {
             } catch (e) {
                 console.log("Error on get game", e)
                 response.json({ err: "Error on Get Game", msg: e })
-            }            
+            }
         }
-    
+
     });
-    
+
+    app.post('/login/', cors(corsOptions), (request, response) => {
+
+        let userQuery = {
+            username: request.body.username
+        }
+        models["user"].findOne(userQuery).exec()
+            .then((queryUser, queryErr) => {
+                if (queryErr) {
+                    response.json({ error: "Query user error:",queryError })
+                }
+                else {
+                    models["user"].findById(queryUser._id).select("-pasw")
+                        .then((safeUser, safeErr) => {
+                            if (safeErr) {
+                                response.json({ error: "Safe user error:", safeError })
+                            }
+                            else {
+                                bcrypt.compare(request.body.pasw, queryUser.pasw)
+                                    .then((match) => {
+                                        response.json(match ? safeUser : {error:"Bad Login"})
+                                    })
+                            }
+                        })
+                }
+            })
+
+    })
+    app.post('/signup/', cors(corsOptions), (request, response) => {
+
+        bcrypt.hash(request.body.pasw, 10, (err, hash) => {
+            if (err) {
+                response.json({ error: err })
+            }
+            let userQuery = {
+                username: request.body.username,
+                pasw: hash
+            }
+            let newUser = new models["user"](userQuery)
+            newUser.save(function (err) {
+                if (err) {
+                    response.send({ error: true })
+                }
+                else {
+                    models["user"].findOne({ username: request.body.username })
+                        .select("-pasw")
+                        .then((user, errr) => {
+                            if (errr) {
+                                response.json({ error: errr })
+                            }
+                            else {
+                                response.json(user)
+                            }
+                        })
+
+                }
+            });
+        })
+    })
+    app.post('/changepw/', cors(corsOptions), async (request, response) => {
+        let userModel = models["user"];
+
+        try {
+            let dbReq = await userModel.findById(request.body._id).exec();
+            dbReq.set(request.body);
+            let result = await dbReq.save();
+            response.send(result);
+        } catch (error) {
+            response.json({ error: "Error updating record" })
+        }
+    })
     app.post('/get/:type', cors(corsOptions), async (request, response) => {
         console.log(request.body)
         let Entry = models[request.params.type];

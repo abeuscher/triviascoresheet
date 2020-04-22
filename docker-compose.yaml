@@ -48,7 +48,6 @@ services:
     volumes:
       - ./appserver/dist:/usr/src/app/dist   
       - ./schemas:/usr/src/app/schemas   
-      - ./appserver/uploads:/usr/src/app/uploads
   mongoexpress:
     image: mongo-express
     container_name: mongo-express

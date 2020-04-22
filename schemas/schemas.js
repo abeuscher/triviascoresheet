@@ -20,7 +20,7 @@ const mongoose = require('mongoose');
 function AppSchemas() {
     return {
         "user":{
-            email:{
+            username:{
                 type:String,
                 unique:true,
                 lowercase:true
