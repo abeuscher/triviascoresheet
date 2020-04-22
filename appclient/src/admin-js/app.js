@@ -105,8 +105,11 @@ class App extends Component {
         var f = window.sessionStorage.getItem("adminstate")
     }
     handleClient = msg => {
-        if (msg == "answerdropped") {
+        if (msg == "answerdropped" || msg.indexOf("team joined:")>-1) {
             this.refreshGame();
+        }
+        if (msg.indexOf("team joined:")>-1) {
+            console.log(msg)
         }
     }
     componentDidUpdate() {
@@ -180,6 +183,8 @@ class App extends Component {
             team: team,
             scored_sheets: []
         })
+        console.log("Emit game data")
+        this.socket.emit("gamecontrol",{label:"teamadded",data:team})
         this.setState(this.state)
         this.saveGame()
     }
@@ -189,7 +194,6 @@ class App extends Component {
         }
         ApiConnector("getGame", JSON.stringify(formData), "game")
             .then(res => {
-                console.log("Game from DB:",res)
                 this.state.game = res
                 this.setState(this.state)
                 this.labelAnswerSheets()

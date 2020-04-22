@@ -5,7 +5,7 @@ export default class Scoresheet extends Component {
     constructor(props) {
         super(props);
     }
-    scoreUpdateMap = [5,10,15,19]
+    scoreUpdateMap = [5,10,15,19,20]
     checkForUpdate = q => {
         return this.scoreUpdateMap.indexOf(q)>-1
     }

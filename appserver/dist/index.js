@@ -100,8 +100,36 @@ let server = app.listen(5000, () => {
 
 
     })
-    app.post('/get/:type', cors(corsOptions), async (request, response) => {
+    app.post('/game/', cors(corsOptions), async (request, response) => {
+        let thisGameModel = models["game"];
+        if (request.body.id && request.body.teamid) {
 
+        }
+        else if (request.body.id) {
+            try {
+                let thisGame = await thisGameModel.findById(request.body.id)
+                    .exec();
+                response.send(thisGame ? thisGame : { error: "not found" });
+            } catch (e) {
+                console.log("Error on get game", e)
+                response.json({ err: "Error on Get Game", msg: e })
+            }
+        }
+        else if (request.body.game_code) {
+            try {
+                let thisGame = await thisGameModel.find(request.body)
+                    .exec();
+                response.send(thisGame ? thisGame : { error: "not found" });
+            } catch (e) {
+                console.log("Error on get game", e)
+                response.json({ err: "Error on Get Game", msg: e })
+            }            
+        }
+    
+    });
+    
+    app.post('/get/:type', cors(corsOptions), async (request, response) => {
+        console.log(request.body)
         let Entry = models[request.params.type];
         if (request.body.id) {
             try {

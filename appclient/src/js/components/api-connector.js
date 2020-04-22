@@ -5,7 +5,7 @@ function apiConnector(action, data, type) {
         addTeam: rootpath + "addteam/",
         submitAnswer: rootpath + "submitanswer/",
         create: rootpath + "create/" + type,
-        read: rootpath + "get/" + type,
+        read: rootpath + "game/",
         update: rootpath + "update/" + type,
         delete: rootpath + "delete/" + type
     }

@@ -5,7 +5,7 @@ function apiConnector(action, data, type) {
         createGame: rootpath + "creategame/",
         getGame: rootpath + "getgame/",
         create: rootpath + "create/" + type,
-        get: rootpath + "get/" + type,
+        get: rootpath + "game/" + type,
         update: rootpath + "update/" + type,
         updateGame: rootpath + "updategame/",
         delete: rootpath + "delete/" + type
