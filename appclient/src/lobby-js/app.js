@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
+import LoginBar from './components/login-bar'
 import GameRow from './components/game-row'
 
 
@@ -17,8 +18,9 @@ class App extends Component {
     constructor(props) {
         super(props)
         this.checkLocalStorage()
-        let saveState = this.getState();
-        this.state = saveState ? saveState : this.defaultState;
+        let saveState = this.getState()
+        this.state = saveState ? saveState : this.defaultState
+        this.getUser()
     }
     defaultState = {
         games: [],
@@ -61,7 +63,10 @@ class App extends Component {
             window.sessionStorage.setItem("lobbystate", JSON.stringify(this.state));
         }
     }
-
+    getUser = () => {
+        this.state.user = JSON.parse(window.sessionStorage.getItem("userstate"))
+        this.setState(this.state)
+    }
     getState = () => {
         if (window.sessionStorage.getItem("lobbystate") != undefined) {
             return JSON.parse(window.sessionStorage.getItem("adminstate"))
@@ -83,11 +88,18 @@ class App extends Component {
     }
     logout = () => {
         window.sessionStorage.removeItem("userstate")
+        this.state.user = {}
+        this.setState(this.state)
+        location.href="login.html"
     }
     render() {
 
         return pug`
             #wrapper
+                LoginBar(
+                    user=this.state.user,
+                    logout=this.logout
+                )
                 .lobby
                     h1 Welcome to the lobby
                     h2 Current Games:

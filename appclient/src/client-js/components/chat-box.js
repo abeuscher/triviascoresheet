@@ -11,7 +11,8 @@ export default class ChatBox extends Component {
                     .messages-bucket
                 .chat-window
                 .app-message
-                    p(className=this.props.messages[0].className)=this.props.messages[0].content
+                    for message,idx in this.props.messages
+                        p(key="chat-message-"+idx,className=message.className)=message.msg
         `
     }
 }

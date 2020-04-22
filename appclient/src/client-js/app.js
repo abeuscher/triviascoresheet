@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 
 import GameSigninForm from './components/game-signin-form'
 import AnswerForm from './components/answer-form'
+import LoginBar from './components/login-bar'
 import ChatBox from './components/chat-box'
 
 import ApiConnector from './components/api-connector'
@@ -31,9 +32,14 @@ class App extends Component {
         }
         if (this.state.mode=="fromlobby") {
             this.state.mode="noteam"
+            this.getUser()
             this.refreshGame()
         }
+        if (this.state.mode="noteam") {
+            this.getUser()
+        }
         if (this.state.mode == "fromurl") {
+            this.getUser()
             this.initGameFromHash()
         }
 
@@ -42,6 +48,34 @@ class App extends Component {
         if (window.sessionStorage.getItem("userstate") == undefined) {
             location.href="login.html"
         }
+    }
+    getUser = () => {
+        this.state.user = JSON.parse(window.sessionStorage.getItem("userstate"))
+        this.setState(this.state)
+        let queryData={
+            id:this.state.game._id,
+            userid:this.state.user._id
+        }
+        ApiConnector("read",JSON.stringify(queryData))
+            .then(res=>{
+                if (res.error) {
+                    this.showMessage("error",res.error)
+                }
+                else {
+                    this.state.team=res
+                    this.state.mode="active"
+                    this.setState(this.state)
+                    this.refreshGame()
+                }
+            })
+    }
+    logout = e => {
+        e.preventDefault();
+        this.state.game={}
+        this.state.team={}
+        this.setState(this.state)
+        window.sessionStorage.removeItem("userstate")
+        location.href="login.html"
     }
     socket = io('http://teamtrivia.localapi:5000')
     makeSocketConnection = () => {
@@ -67,7 +101,8 @@ class App extends Component {
             this.refreshGame();
         }
         else if (msg=="startgame") {
-
+            this.refreshGame();
+            this.showMessage("happy","The game has started! Hooray! Hooray for School!")
         }
         else if (typeof msg === "object") {
             if (msg.label=="teamadded" && msg.data._id==this.state.team._id) {
@@ -79,7 +114,8 @@ class App extends Component {
         }
     }
     showMessage = (className,msg) => {
-        this.state.messages.push(className,msg)
+        this.state.messages.push({className:className,msg:msg})
+        this.setState(this.state)
     }
     componentDidUpdate() {
         this.setLocalStorage()
@@ -205,7 +241,7 @@ class App extends Component {
     }
 
     handleIntroFormSubmit = e => {
-        ApiConnector("addTeam", JSON.stringify({ _id: this.state.game._id, team: { team_name: this.state.team.team_name } }))
+        ApiConnector("addTeam", JSON.stringify({ _id: this.state.game._id, team: { team_name: this.state.team.team_name, users:[this.state.user] } }))
             .then(res => {
                 if (res._id) {
                     this.state.mode = "waiting_room"
@@ -229,7 +265,6 @@ class App extends Component {
         ApiConnector("read", JSON.stringify(formData))
             .then(res => {
                 if (res._id) {
-                    console.log("Refresh:",res)
                     this.state.game = res
                     this.setState(this.state)
                     this.newAnswerSheet()
@@ -273,6 +308,10 @@ class App extends Component {
                 if this.state.error!=""
                     h2.error=this.state.error
                 else
+                    LoginBar(
+                        user=this.state.user,
+                        logout=this.logout
+                        )
                     if this.state.mode=="noteam"
                         GameSigninForm(
                             game=this.state.game,
@@ -294,6 +333,9 @@ class App extends Component {
                             changeAnswer=this.changeAnswer,
                             changeBid=this.changeBid
                         )
+                    ChatBox(
+                        messages=this.state.messages
+                    )
             
         `
     }

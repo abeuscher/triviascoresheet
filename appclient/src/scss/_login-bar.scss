@@ -1,0 +1,19 @@
+.login-bar {
+    background:$black;
+    color:$white;
+    text-align:right;
+    padding:.1em 1em;
+    font-size:.8em;
+    line-height:.9;
+    a {
+        color:#ccc;
+        margin-left:.5em;
+        padding:.2em;
+        border:1px solid #666;
+        @include nice-transition();
+        &:hover {
+            border-color:$white;
+            color:$white;
+        }
+    }
+}

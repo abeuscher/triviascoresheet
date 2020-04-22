@@ -1,0 +1,7 @@
+.chat-widget {
+    padding:$gutter-width/2 $gutter-width;
+    margin:$gutter-width/2 $gutter-width 0;
+    border:1px solid $blue;
+    background:lighten($blue,30%);
+    color:$white;
+}
