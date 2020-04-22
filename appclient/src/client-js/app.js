@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 
 import GameSigninForm from './components/game-signin-form'
 import AnswerForm from './components/answer-form'
+import ChatBox from './components/chat-box'
 
 import ApiConnector from './components/api-connector'
 
@@ -20,6 +21,7 @@ class App extends Component {
 
     constructor(props) {
         super(props)
+        this.checkForUser()
         let saveState = this.getLocalStorage()
         this.state = saveState ? saveState : this.defaultState
         this.makeSocketConnection()
@@ -27,12 +29,20 @@ class App extends Component {
         if (saveState) {
             this.refreshGame()
         }
-        if (this.state.mode == "fresh") {
+        if (this.state.mode=="fromlobby") {
+            this.state.mode="noteam"
+            this.refreshGame()
+        }
+        if (this.state.mode == "fromurl") {
             this.initGameFromHash()
         }
 
     }
-
+    checkForUser = () => {
+        if (window.sessionStorage.getItem("userstate") == undefined) {
+            location.href="login.html"
+        }
+    }
     socket = io('http://teamtrivia.localapi:5000')
     makeSocketConnection = () => {
         this.socket.on('connect', () => {
@@ -56,6 +66,9 @@ class App extends Component {
             this.setState(this.state)
             this.refreshGame();
         }
+        else if (msg=="startgame") {
+
+        }
         else if (typeof msg === "object") {
             if (msg.label=="teamadded" && msg.data._id==this.state.team._id) {
                 this.state.mode="active"
@@ -65,11 +78,14 @@ class App extends Component {
             }
         }
     }
+    showMessage = (className,msg) => {
+        this.state.messages.push(className,msg)
+    }
     componentDidUpdate() {
         this.setLocalStorage()
     }
     defaultState = {
-        mode: "fresh", //fresh, active, waiting, over
+        mode: "fromurl", //fromurl,fromlobby active, waiting, over
         error: "",
         team: {
             team_name: "",
@@ -78,7 +94,11 @@ class App extends Component {
         game: null,
         current_answer_sheet: null,
         current_bid:1,
-        bids: [1, 3, 5, 7]
+        bids: [1, 3, 5, 7],
+        messages:[{
+            className:"intro",
+            msg:"Welcome to the Game!"
+        }]
     }
     makeBlankAnswerSheet = qnum => {
         let answers = [this.blankAnswer(null)]
@@ -150,13 +170,14 @@ class App extends Component {
             console.log("Url",url_hash)
             ApiConnector("read", JSON.stringify({ game_code: url_hash }))
                 .then(res => {
-                    console.log("From URL:",res)
                     if (res.length == 1) {
                         this.state.game = Object.assign({}, this.state.game, res[0])
+                        this.state.mode="noteam"
                         this.setState(this.state)
                     }
                     else {
-                        this.state.error = "No game specified. Bad URL";
+                        this.state.error = "No game specified. Bad URL"
+                        this.state.mode="noteam"
                         this.setState(this.state)
                     }
                 })
@@ -252,7 +273,7 @@ class App extends Component {
                 if this.state.error!=""
                     h2.error=this.state.error
                 else
-                    if this.state.mode=="fresh"
+                    if this.state.mode=="noteam"
                         GameSigninForm(
                             game=this.state.game,
                             team=this.state.team,

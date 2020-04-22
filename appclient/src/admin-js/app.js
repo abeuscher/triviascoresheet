@@ -150,6 +150,7 @@ class App extends Component {
         this.state.game = record
         this.setState(this.state)
     }
+
     deleteGame = record => {
         console.log("I could delete this record:", record)
     }
@@ -158,6 +159,13 @@ class App extends Component {
         this.refreshGame()
         this.state.mode = "play"
         this.setState(this.state)
+    }
+    beginGame = () => {
+        this.state.game.game_status="running"
+        this.state.game.current_question=1
+        this.setState(this.state)
+        this.saveGame();
+        this.socket.emit("gamecontrol","startgame")
     }
     createGame = e => {
         e.preventDefault()
@@ -302,6 +310,7 @@ class App extends Component {
                 mode=this.state.mode,
                 game=this.state.game,
                 changeQuestion=this.changeQuestion,
+                beginGame=this.beginGame,
                 adminButtons=this.adminButtons()
             )
             #wrapper 

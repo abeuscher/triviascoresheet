@@ -1,0 +1,17 @@
+.lobby {
+    background:$white;
+    padding:$gutter-width/2 $gutter-width;
+    .game-row {
+        padding:$gutter-width/4;
+        align-items:center;
+        .button {
+            display:block;
+        }
+        &:nth-child(odd) {
+            background:lighten($blue,60%)
+        }
+        &:nth-child(even) {
+            background:lighten($blue,70%)
+        }
+    }
+}

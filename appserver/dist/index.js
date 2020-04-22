@@ -114,13 +114,11 @@ let server = app.listen(5000, () => {
                 console.log("Error on get game plus team", e)
                 response.json({ err: "Error on Get Game Plus Team", msg: e })
             }
-
-
         }
         else if (request.body.id) {
             try {
                 let thisGame = await thisGameModel.findById(request.body.id)
-                    .exec();
+                    .select("-scoresheet,-answer_basket,-waiting_room");
                 response.send(thisGame ? thisGame : { error: "not found" });
             } catch (e) {
                 console.log("Error on get game", e)
@@ -134,8 +132,18 @@ let server = app.listen(5000, () => {
                 response.send(thisGame ? thisGame : { error: "not found" });
             } catch (e) {
                 console.log("Error on get game", e)
-                response.json({ err: "Error on Get Game", msg: e })
+                response.json({ error: "Error on Get Game", msg: e })
             }
+        }
+        else {
+            try {
+                let thisGame = await thisGameModel.find()
+                    .select("-scoresheet,-answer_basket,-waiting_room");
+                response.send(thisGame ? thisGame : { error: "not found" });
+            } catch (e) {
+                console.log("Error on get game", e)
+                response.json({ error: "Error on Get Game", msg: e })
+            }            
         }
 
     });

@@ -5,21 +5,13 @@ import LoginForm from './components/login-form'
 import SignupForm from './components/signup-form'
 import RetrievePasswordForm from './components/retrieve-password-form'
 
-
 import ApiConnector from './components/api-connector'
-
-import io from 'socket.io-client'
-
-/*
-
-    
-
-*/
 
 class App extends Component {
 
     constructor(props) {
         super(props)
+        this.checkLocalStorage()
         this.state = {
             view:"login", // login, signup, changepw
             creds: {
@@ -29,6 +21,15 @@ class App extends Component {
             },
             error:""
         }
+    }
+    checkLocalStorage = () => {
+        if (window.sessionStorage.getItem("userstate") != undefined) {
+            location.href="lobby.html"
+        }
+    }
+
+    logout = () => {
+        window.sessionStorage.removeItem("userstate")
     }
     changeView = view => {
         this.state.view = view
@@ -67,7 +68,14 @@ class App extends Component {
         if (this.checkForm) {
             ApiConnector("login",JSON.stringify(this.state.creds))
                 .then(res=>{
-                    console.log(res)
+                    if (res.error) {
+                        this.showError("You fail!")
+                    }
+                    else {
+                        window.sessionStorage.setItem("userstate", JSON.stringify(res));
+                        location.href="lobby.html"                        
+                    }
+
                 })
         }     
     }

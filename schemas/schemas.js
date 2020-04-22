@@ -89,7 +89,7 @@ function AppSchemas() {
             },
             game_status: {
                 type: String,
-                default: "new"
+                default: "not started"
             },
             game_description: {
                 type: String

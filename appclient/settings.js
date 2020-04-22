@@ -6,6 +6,7 @@ var jsBuildDir = buildDir + "js/";
 
 var adminjsSrcDir = srcDir + "admin-js/";
 var loginjsSrcDir = srcDir + "login-js/";
+var lobbyjsSrcDir = srcDir + "lobby-js/";
 
 var sassSrcDir = srcDir + "scss/";
 var sassBuildDir = buildDir + "css/";
@@ -35,6 +36,13 @@ function siteSettings() {
         srcFileName: "app.js",
         buildDir: jsBuildDir,
         buildFileName: "admin-bundle.js"
+      },
+      {
+        name: "Lobby Bundle",
+        srcDir: lobbyjsSrcDir,
+        srcFileName: "app.js",
+        buildDir: jsBuildDir,
+        buildFileName: "lobby-bundle.js"
       },
       {
         name: "Login Bundle",
