@@ -16,6 +16,14 @@ export default class WysiwygInput extends Component {
                     key=this.props.id,
                     id=this.props.id,
                     name=this.props.id,
+                    init={
+                        plugins: 'visualchars lists link table hr code',
+                        menubar: '',
+                        toolbar: 'undo redo | bold italic underline strikethrough | link | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | code',
+                        toolbar_sticky: true,
+                        toolbar_mode: 'sliding',
+                        contextmenu: "link",
+                       },
                     initialValue=this.props.value
                     onEditorChange=this.props.handleChange
             )

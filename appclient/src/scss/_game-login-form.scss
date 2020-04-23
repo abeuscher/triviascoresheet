@@ -1,7 +1,7 @@
-form.login-form, form.signup-form {
+.game-signin-form {
+    text-align:center;
     max-width:300px;
     margin:0 auto;
-    padding:$gutter-width 0;
     label {
         display:block;
         font-size:.8em;
@@ -20,22 +20,5 @@ form.login-form, form.signup-form {
     .button {
         display:block;
         margin:$gutter-width/2 10%;
-    }
-    .forgot-password {
-        text-align:center;
-        display:block;
-        &:hover {
-            text-decoration:underline;
-        }
-
-    }
-}
-.form-header {
-    background:$black;
-    h2 {
-        margin:0;
-        line-height:2;
-        color:$white;
-        text-align: center;
     }
 }

@@ -20,7 +20,6 @@ class App extends Component {
         this.checkLocalStorage()
         let saveState = this.getState()
         this.state = saveState ? saveState : this.defaultState
-        this.getUser()
     }
     defaultState = {
         games: [],
@@ -31,7 +30,7 @@ class App extends Component {
         error: "",
         team: {
             team_name: "",
-            answer_history: new Array(20)
+            answer_history: []
         },
         game: null,
         current_answer_sheet: null,
@@ -48,6 +47,7 @@ class App extends Component {
         }
     }
     componentDidMount() {
+        this.getUser()
         this.fetchGames()
     }
     fetchGames = () => {

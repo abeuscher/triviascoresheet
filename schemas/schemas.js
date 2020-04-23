@@ -19,40 +19,44 @@ const mongoose = require('mongoose');
 
 function AppSchemas() {
     return {
-        "user":{
-            username:{
-                type:String,
-                unique:true,
-                lowercase:true
+        "user": {
+            username: {
+                type: String,
+                unique: true,
+                lowercase: true
             },
-            pasw:{
-                type:String
+            pasw: {
+                type: String
             },
-            display_name:{
-                type:String
+            display_name: {
+                type: String
             },
-            privileges:[{
-                "admin": {
-                    type:Boolean,
-                    default:false
-                },
-                "host": {
-                    type:Boolean,
-                    default:false
-                },
-                "player":{
-                    type:Boolean,
-                    default:true
-                }
-            }]
+            admin: {
+                type: Boolean,
+                default: false
+            },
+            host: {
+                type: Boolean,
+                default: false
+            },
+            player: {
+                type: Boolean,
+                default: true
+            }
         },
         "team": {
             team_name: {
                 type: String
             },
-            users:[{
-                ref:"user",
+            users: [{
+                ref: "user",
                 type: mongoose.Schema.Types.ObjectId
+            }],
+            answer_history: [{
+                question:{
+                    type:Number,
+                    unique:true
+                }
             }],
             created: {
                 type: Date,

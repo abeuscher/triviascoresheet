@@ -1,0 +1,19 @@
+.game-entry-form {
+    label {
+        display:block;
+        text-transform:uppercase;
+        font-size:.8em;
+    }
+    input, select, .react-datepicker-wrapper {
+        width:100%;
+        margin-bottom:$gutter-width;
+    }
+    .react-datepicker-wrapper {
+        input {
+            margin:0;
+        }
+    }
+    .react-datepicker-popper {
+        z-index:999;
+    }
+}

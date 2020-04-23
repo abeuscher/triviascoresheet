@@ -2,7 +2,7 @@ function apiConnector(action, data, type) {
 
     let rootpath = "http://localhost:5000/";
     let paths = {
-        read: rootpath + "game/",
+        read: rootpath + "clientgame/",
         update: rootpath + "update/" + type
     }
 

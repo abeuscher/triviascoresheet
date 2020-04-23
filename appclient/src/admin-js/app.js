@@ -7,6 +7,7 @@ import DateInput from './components/form-fields/date-input'
 
 import ApiConnector from './components/api-connector'
 
+import LoginBar from './components/login-bar'
 import AdminNav from './components/admin-nav'
 import GameForm from './components/game-form'
 import GameManager from './components/game-manager'
@@ -36,15 +37,34 @@ class App extends Component {
     constructor(props) {
         super(props);
         let saveState = this.getLocalStorage();
+        console.log("Saved State:",saveState)
         this.state = saveState ? saveState : this.defaultState;
         this.makeSocketConnection()
 
-        if (saveState) {
+        if (saveState && this.state.mode=="play") {
             this.refreshGame()
         }
 
     }
+    checkForAdmin = () => {
+        if (window.sessionStorage.getItem("userstate") == undefined) {
+            location.href = "login.html"
+            return false
+        }
+
+        let thisUser = JSON.parse(window.sessionStorage.getItem("userstate"))
+        if (thisUser.admin) {
+            this.state.user = thisUser
+            this.setState(this.state)
+            return true
+        }
+        else {
+            location.href = "login.html"
+            return false
+        }
+    }
     componentDidMount() {
+        this.checkForAdmin()
         if (this.state.mode == "manager") {
             this.launchManager();
         }
@@ -87,15 +107,20 @@ class App extends Component {
         }]
     }
     setLocalStorage = () => {
-        if (this.state.game._id != null) {
-            console.log("Save to local storage")
-            window.sessionStorage.setItem("adminstate", JSON.stringify(this.state));
-        }
+        console.log("Save to local storage")
+        console.log(this.state)
+        window.sessionStorage.setItem("adminstate", JSON.stringify(this.state));
     }
 
     getLocalStorage = () => {
         if (window.sessionStorage.getItem("adminstate") != undefined) {
-            return JSON.parse(window.sessionStorage.getItem("adminstate"))
+            let thisState = JSON.parse(window.sessionStorage.getItem("adminstate","utf-8"))
+            if (typeof thisState.game=="Array") {
+                thisState.game = JSON.parse(window.sessionStorage.getItem("adminstate","utf-8")).game[0]
+            }
+            
+            console.log("parsed:",thisState)
+            return thisState
         }
         return false
     }
@@ -105,12 +130,21 @@ class App extends Component {
         var f = window.sessionStorage.getItem("adminstate")
     }
     handleClient = msg => {
-        if (msg == "answerdropped" || msg.indexOf("team joined:")>-1) {
+        if (msg == "answerdropped") {
             this.refreshGame();
         }
-        if (msg.indexOf("team joined:")>-1) {
-            console.log(msg)
+        else {
+            this.showMessage(msg)
         }
+    }
+    showMessage = msg => {
+
+    }
+    logout = () => {
+        window.sessionStorage.removeItem("userstate")
+        this.state.user = {}
+        this.setState(this.state)
+        location.href = "login.html"
     }
     componentDidUpdate() {
         this.setLocalStorage()
@@ -120,12 +154,18 @@ class App extends Component {
         this.state.game.start_time = e.toString()
         this.setState(this.state)
     }
-    launchManager = () => {
+    launchManager = e => {
+        if (e) {
+            e.preventDefault()
+        }
         this.state.mode = "manager"
         this.setState(this.state)
         this.fetchGames()
     }
-    newGame = () => {
+    newGame = e => {
+        if (e) {
+            e.preventDefault()
+        }
         this.state.mode = "create"
         this.state.game = this.defaultState.game
         this.state.game.game_code = this.generateCode()
@@ -152,7 +192,15 @@ class App extends Component {
     }
 
     deleteGame = record => {
-        console.log("I could delete this record:", record)
+        ApiConnector("delete",JSON.stringify(record),"game")
+            .then(res=>{
+                if (res.deleted) {
+                    this.fetchGames()
+                }
+                else {
+                    console.log(res)
+                }
+            })
     }
     playGame = game => {
         this.state.game = game
@@ -161,16 +209,15 @@ class App extends Component {
         this.setState(this.state)
     }
     beginGame = () => {
-        this.state.game.game_status="running"
-        this.state.game.current_question=1
+        this.state.game.game_status = "running"
+        this.state.game.current_question = 1
         this.setState(this.state)
         this.saveGame();
-        this.socket.emit("gamecontrol","startgame")
+        this.socket.emit("gamecontrol", "startgame")
     }
     createGame = e => {
         e.preventDefault()
-        let formData = JSON.stringify(this.state.game);
-        ApiConnector("createGame", formData)
+        ApiConnector("create", JSON.stringify(this.state.game),"game")
             .then(res => {
                 this.state.game = res
                 this.state.mode = "edit"
@@ -192,7 +239,7 @@ class App extends Component {
             scored_sheets: []
         })
         console.log("Emit game data")
-        this.socket.emit("gamecontrol",{label:"teamadded",data:team})
+        this.socket.emit("gamecontrol", { label: "teamadded", data: team })
         this.setState(this.state)
         this.saveGame()
     }
@@ -204,7 +251,9 @@ class App extends Component {
             .then(res => {
                 this.state.game = res
                 this.setState(this.state)
-                this.labelAnswerSheets()
+                if (this.state.mode=="play") {
+                    this.labelAnswerSheets()
+                }
             })
     }
     labelAnswerSheets = () => {
@@ -231,7 +280,7 @@ class App extends Component {
         this.state.game.scoresheet.forEach(row => {
             console.log("This Answer Sheet:", this.state.game.answer_basket[answer_idx])
             if (row.team._id == thisTeam._id) {
-                let thisAnswer = Object.assign({},this.state.game.answer_basket[answer_idx].answer_sheet,{status:"scored"})
+                let thisAnswer = Object.assign({}, this.state.game.answer_basket[answer_idx].answer_sheet, { status: "scored" })
                 row.scored_sheets.push(thisAnswer)
                 this.state.game.answer_basket.splice(answer_idx, 1)
             }
@@ -253,19 +302,19 @@ class App extends Component {
         else {
             answerSheet = JSON.parse(e.target.getAttribute("data-item"))
         }
-        answerSheet.status="answer_basket"
-        this.state.game.scoresheet.forEach((row,idx)=>{
-            row.scored_sheets.forEach((sheet,sheet_idx)=>{
-                if (sheet._id==answerSheet._id) {
+        answerSheet.status = "answer_basket"
+        this.state.game.scoresheet.forEach((row, idx) => {
+            row.scored_sheets.forEach((sheet, sheet_idx) => {
+                if (sheet._id == answerSheet._id) {
                     rowIndex = idx;
-                    qIndex=sheet_idx;
-                    thisTeam = row.team;                    
+                    qIndex = sheet_idx;
+                    thisTeam = row.team;
                 }
             })
         })
 
-        this.state.game.scoresheet[rowIndex].scored_sheets.splice(qIndex,1);
-        this.state.game.answer_basket.push({team:thisTeam,answer_sheet:answerSheet})
+        this.state.game.scoresheet[rowIndex].scored_sheets.splice(qIndex, 1);
+        this.state.game.answer_basket.push({ team: thisTeam, answer_sheet: answerSheet })
         this.setState(this.state)
         this.saveGame()
     }
@@ -282,7 +331,7 @@ class App extends Component {
         this.setState(this.state)
         ApiConnector("updateGame", JSON.stringify(this.state.game))
             .then(res => {
-                this.state.game=res
+                this.state.game = res
                 this.setState(this.state)
                 this.socket.emit("gamecontrol", "refreshdb")
             })
@@ -306,6 +355,10 @@ class App extends Component {
     }
     render() {
         return pug`
+            LoginBar(
+                user=this.state.user,
+                logout=this.logout
+            )
             AdminNav(
                 mode=this.state.mode,
                 game=this.state.game,
@@ -324,9 +377,11 @@ class App extends Component {
                 else
                     
                     if this.state.mode=="edit"
+                        .padded-column.section-title
+                            h2 Player Link:
                         .padded-column
-                            h3 Player Link:
-                            a(href="http://teamtrivia.local/?pqid="+this.state.game.game_code)="http://teamtrivia.local/?pqid="+this.state.game.game_code
+                            p
+                                a(href="http://teamtrivia.local/?pqid="+this.state.game.game_code)="http://teamtrivia.local/?pqid="+this.state.game.game_code
                     if this.state.mode=="edit" || this.state.mode=="create"
                         GameForm(
                             game=this.state.game,

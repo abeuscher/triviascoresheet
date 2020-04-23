@@ -10,6 +10,7 @@ import ApiConnector from './components/api-connector'
 
 import io from 'socket.io-client'
 
+import parseHTML from './utils/parse-html'
 /*
 
     TODO:
@@ -108,7 +109,7 @@ class App extends Component {
         }
     }
     showMessage = (className,msg) => {
-        this.state.messages.push({className:className,msg:msg})
+        this.state.messages.app.push({className:className,msg:msg})
         this.setState(this.state)
     }
     componentDidMount() {
@@ -133,7 +134,7 @@ class App extends Component {
         error: "",
         team: {
             team_name: "",
-            answer_history:new Array(20)
+            answer_history:[]
         },
         game: null,
         current_answer_sheet: null,
@@ -257,14 +258,14 @@ class App extends Component {
         this.setState(this.state)
     }
     messageHost = () => {
-        this.socket.emit("clientmsg",this.state.current_message)
-        this.state.current_message=""
+        this.socket.emit("clientmsg",this.state.messages.current_message)
+        this.state.messages.current_message=""
         this.setState(this.state)
     }
     
     messagePlayers = () => {
-        this.socket.emit("playerchat",this.state.user.username+": " +this.state.current_message)
-        this.state.current_message=""
+        this.socket.emit("playerchat",this.state.user.username+": " +this.state.messages.current_message)
+        this.state.messages.current_message=""
         this.setState(this.state)
     }
     
@@ -274,6 +275,7 @@ class App extends Component {
                 if (res._id) {
                     this.state.mode = "waiting_room"
                     this.state.team = res
+                    this.state.team.answer_history=[]
                     this.setState(this.state)
                     this.socket.emit("clientmsg", "team joined: "+ this.state.team.team_name)
                 }
@@ -302,6 +304,18 @@ class App extends Component {
                 }
             })
     }
+    updateTeam = () => {
+       ApiConnector("update",JSON.stringify(this.state.team),"team")
+        .then(res=>{
+            if (res.error) {
+                this.showMessage("error",res.error)
+            }
+            else {
+                this.state.team=res
+                this.setState(this.state)
+            }
+        }) 
+    }
     newAnswerSheet = () => {
         this.state.current_answer_sheet = this.makeBlankAnswerSheet(this.state.game.current_question)
         this.setState(this.state)
@@ -311,11 +325,10 @@ class App extends Component {
         let formData = { gameid:this.state.game._id,teamid: this.state.team._id, answer_sheet: this.state.current_answer_sheet }
         ApiConnector("submitAnswer", JSON.stringify(formData))
             .then(res => {
-                this.state.answer_history = res.data
+                this.state.team.answer_history.push(this.state.game.current_question)
                 this.state.current_answer_sheet = null
                 this.setState(this.state)
                 this.socket.emit("clientmsg", "answerdropped")
-                console.log("Answer submitted", res);
             })
     }
     changeAnswer = (e, numAnswer) => {

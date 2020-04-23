@@ -2,7 +2,6 @@ function apiConnector(action, data, type) {
 
     let rootpath = "http://teamtrivia.localapi:5000/";
     let paths = {
-        createGame: rootpath + "creategame/",
         getGame: rootpath + "getgame/",
         create: rootpath + "create/" + type,
         get: rootpath + "game/" + type,

@@ -53,7 +53,7 @@ class App extends Component {
         }
         this.state.error=msg
         this.setState(this.state)   
-        setTimeout(flashError,5000)     
+        setTimeout(flashError,15000)     
     }
     showMessage = msg => {
         const flashMessage = () => { 
@@ -65,9 +65,11 @@ class App extends Component {
         setTimeout(flashMessage,5000)     
     }
     login = e => {
+        e.preventDefault()
         if (this.checkForm) {
             ApiConnector("login",JSON.stringify(this.state.creds))
                 .then(res=>{
+                    console.log(res)
                     if (res.error) {
                         this.showError("You fail!")
                     }
@@ -84,7 +86,8 @@ class App extends Component {
             ApiConnector("signup",JSON.stringify(this.state.creds))
                 .then(res=>{
                     if (res._id) {
-                        console.log("Success ready to route to app.")
+                        window.sessionStorage.setItem("userstate", JSON.stringify(res));
+                        location.href="lobby.html"     
                     }
                     else {
                         console.log(res)
