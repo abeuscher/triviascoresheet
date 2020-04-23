@@ -15,6 +15,7 @@ export default class AnswerForm extends Component {
         - let game = this.props.game
         .answer-form.section-title
             h2=game.game_title
+        .answer-form.description(dangerouslySetInnerHTML={__html:this.props.game.game_description})
         .answer-form
             h3="Your Team: "+this.props.team.team_name
             if this.props.mode=="waiting_room"

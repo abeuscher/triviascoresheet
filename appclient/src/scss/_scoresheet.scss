@@ -1,11 +1,23 @@
 .scoresheet {
-    .flex {
-        display: flex;
+    
+    .team-column {
+        flex-basis: 15%;
+        border: 1px solid $black;
+    }
+    .scoresheet-header {
+        justify-content:center;
     }
     .team-column {
-        flex-basis: 20%;
-    }
+        h2 {
+            padding:0 .5em;
+            margin:0;
+            font-size:1.2em;
+            line-height:3
+        }
+    }    
     .score-row {
+        justify-content:center;
+
         .answer-box {
             @include nice-transition();
             &:not(.blank):not(.update) {
@@ -15,16 +27,48 @@
                 }
             }
         }
+        &:nth-child(odd) {         
+            .answer-box, .team-column {
+                background: lighten($blue, 60%);
+                &.blank {
+                    background: lighten($blue, 30%);
+                }
+                &.update {
+                    background: $blue;
+                    color: $white;
+                }
+            }
+        }
+        &:nth-child(even) {
+            .answer-box, .team-column {
+                background: lighten($blue, 70%);
+                &.blank {
+                    background: lighten($blue, 40%);
+                }
+                &.update {
+                    background: darken($blue, 10%);
+                    color: $white;
+                }
+            }
+        }
+    }
+    .team-column, .answer-box {
+        font-size:1.2vw;  
+        @include bp(l) {
+            font-size:1.1em;
+        }      
     }
     .answer-box {
-        flex-basis: 3%;
+        flex-basis: 3.1%;
         display: flex;
         justify-content: center;
         align-items: center;
         padding: 0;
-        border: 1px solid black;
-        &.blank {
-            background: gray;
+        border: 1px solid $black;
+        &.current {
+            font-weight:bold;
+            background:$black;
+            color:$white;
         }
         p {
             display: inline-block;

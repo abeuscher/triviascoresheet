@@ -274,17 +274,28 @@ class App extends Component {
         this.setState(this.state)
     }
     tickAnswer = (e, basket_idx, answer_idx) => {
-        console.log(this.state.game.answer_basket[basket_idx].answer_sheet.answers[answer_idx])
         this.state.game.answer_basket[basket_idx].answer_sheet.answers[answer_idx].correct = e.target.checked
         this.setState(this.state)
     }
     scoreAnswer = answer_idx => {
         let thisTeam = this.state.game.answer_basket[answer_idx].team
         this.state.game.scoresheet.forEach(row => {
-            console.log("This Answer Sheet:", this.state.game.answer_basket[answer_idx])
             if (row.team._id == thisTeam._id) {
-                let thisAnswer = Object.assign({}, this.state.game.answer_basket[answer_idx].answer_sheet, { status: "scored" })
-                row.scored_sheets.push(thisAnswer)
+                let thisSheet = this.state.game.answer_basket[answer_idx].answer_sheet
+                thisSheet.status="scored"
+
+                // Handle bonus questions
+                if (thisSheet.q%10==0) {
+                    console.log(thisSheet,thisSheet.answers[0].correct ? thisSheet.answers[0].bid : -1 * (thisSheet.answers[0].bid/2))
+                    thisSheet.score=(thisSheet.answers[0].correct ? thisSheet.answers[0].bid : -1 * (thisSheet.answers[0].bid/2))
+                }
+                else {
+                    thisSheet.score = 0;
+                    thisSheet.answers.forEach(answer=>{
+                        thisSheet.score += answer.correct ? answer.bid : 0
+                    })
+                }
+                row.scored_sheets.push(thisSheet)
                 this.state.game.answer_basket.splice(answer_idx, 1)
             }
         })

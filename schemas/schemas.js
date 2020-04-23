@@ -116,14 +116,15 @@ function AppSchemas() {
                         type: String,
                         default: "unsubmitted"
                     },
+                    score: {
+                        type:Number,
+                        default:0
+                    },
                     answers: [{
                         content: {
                             type: String
                         },
                         bid: {
-                            type: Number
-                        },
-                        scored: {
                             type: Number
                         },
                         correct: {
@@ -156,10 +157,6 @@ function AppSchemas() {
                         },
                         bid: {
                             type: Number
-                        },
-                        scored: {
-                            type: Number,
-                            default:0
                         },
                         correct: {
                             type: Boolean,

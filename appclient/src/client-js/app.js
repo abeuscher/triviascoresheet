@@ -42,8 +42,8 @@ class App extends Component {
         ApiConnector("read", JSON.stringify(queryData))
             .then(res => {
                 if (!res.error) {
-                    this.state.team = res
-                    this.state.mode = "active"
+                    this.state.mode=res.status
+                    this.state.team = res.data
                     this.setState(this.state)
                     this.refreshGame()
                 }
@@ -93,7 +93,6 @@ class App extends Component {
     handleGameControl = msg => {
         console.log("Game Control:", msg)
         if (msg == "refreshdb") {
-            this.state.mode = "active"
             this.setState(this.state)
             this.refreshGame();
         }
@@ -348,13 +347,23 @@ class App extends Component {
             console.log("Bonus question")
         }
         else {
-            let tempBids = this.state.game.current_question < 10 ? [1, 3, 5, 7] : [2, 4, 6, 8]
-            let questions = [[1, 2, 3, 4], [6, 7, 8, 9], [11, 12, 13, 14], [16, 17, 18, 19]][parseInt(this.state.game.current_question / 5)]
-            this.state.team.answer_history.forEach(answer => {
-                if (questions.indexOf(answer.q) > -1) {
-                    tempBids.splice(tempBids.indexOf(answer.bid), 1)
-                }
-            })
+            let tempBids = []
+            if (this.state.game.current_question==10) {
+                tempBids = [2,4,6,8,10]
+            }
+            else if (this.state.game.current_question==20) {
+                tempBids = [2,4,6,8,10,12,14,16,18,20]
+            }
+            else {
+                tempBids = this.state.game.current_question < 10 ? [1, 3, 5, 7] : [2, 4, 6, 8]
+                let questions = [[1, 2, 3, 4], [6, 7, 8, 9], [11, 12, 13, 14], [16, 17, 18, 19]][parseInt(this.state.game.current_question / 5)]
+                this.state.team.answer_history.forEach(answer => {
+                    if (questions.indexOf(answer.q) > -1) {
+                        tempBids.splice(tempBids.indexOf(answer.bid), 1)
+                    }
+                })                
+            }
+
             this.state.bids = tempBids
             this.state.current_bid = tempBids[0]
             this.setState(this.state)

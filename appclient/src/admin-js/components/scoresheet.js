@@ -9,13 +9,6 @@ export default class Scoresheet extends Component {
     checkForUpdate = q => {
         return this.scoreUpdateMap.indexOf(q)>-1
     }
-    getAnswerValue = answers => {
-        let total = 0
-        answers.forEach(a=>{
-            total = a.correct ? total + a.bid : total
-        })
-        return total
-    }
     getScore = (question,answers) => {
         let output = false;
         answers.forEach(answer => {
@@ -31,17 +24,16 @@ export default class Scoresheet extends Component {
         .scoresheet
             .padded-column.section-title
                 h2 Scoresheet        
-            .scoresheet-header(key="scoresheet-header")
-                .scoresheet-header-row.flex(key="scoresheet-header-row")
-                    .team-column(key="scoresheet-team-name-header")
-                        p(key="scoresheet-team-name-header-label") Team Name
-                    each i,idx in theCount
-                        - let c = idx + 1
-                        .answer-box(key="scoresheet-header-"+c)
-                            p(key="scoresheet-header-p-"+c)=c
-                        if this.checkForUpdate(c)
-                            .answer-box.update(key="scoresheet-header-update-"+c)
-                                p(key="scoresheet-header-update-p-"+c) U
+            .scoresheet-header.flex
+                .team-column
+                    h2 Team Name
+                each i,idx in theCount
+                    - let c = idx + 1
+                    .answer-box(key="scoresheet-header-"+c,className=c==this.props.game.current_question?"current":"")
+                        p(key="scoresheet-header-p-"+c)=c
+                    if this.checkForUpdate(c)
+                        .answer-box.update(key="scoresheet-header-update-"+c)
+                            p(key="scoresheet-header-update-p-"+c) U
             for row,row_idx in this.props.game.scoresheet
                 - let total = 0;
                 .score-row.flex(key="scoresheet-form-row-"+row_idx)
@@ -51,24 +43,14 @@ export default class Scoresheet extends Component {
                         - let c = idx + 1
                         if this.getScore(c,row.scored_sheets)
                             - let item = this.getScore(c,row.scored_sheets)
-                            - let bidTotal = this.getAnswerValue(item.answers)
-                            if c!=5 && c!=15
-                                AnswerBox(
-                                    key="answer-box-normal-"+row_idx+"-"+c,
-                                    sheet=JSON.stringify(item),
-                                    onClick=this.props.sendToBasket,
-                                    labelClass=item.answers[0].correct ? "true" : "false",
-                                    cellValue=item.answers[0].bid
-                                    )
-                                - total = item.answers[0].correct ? total + bidTotal : total
-                            else
-                                AnswerBox(
-                                    key="answer-box-fourpart-"+row_idx+"-"+c,
-                                    sheet=JSON.stringify(item),
-                                    onClick=this.props.sendToBasket,
-                                    cellValue=bidTotal
-                                    )
-                                - total = total + bidTotal                  
+                            AnswerBox(
+                                key="answer-box-normal-"+row_idx+"-"+c,
+                                sheet=JSON.stringify(item),
+                                onClick=this.props.sendToBasket,
+                                labelClass=item.answers[0].correct ? "true" : "false",
+                                cellValue=item.score
+                                )
+                            - total = total + item.score           
                         else
                             AnswerBox(
                                 key="answer-box-blank-"+row_idx+"-"+c,
@@ -98,7 +80,7 @@ class AnswerBox extends Component {
                 )
                 p(
                     className=this.props.labelClass || "",
-                    )=this.props.cellValue   
+                    )=this.props.cellValue.toString()
         `
     }  
 }

@@ -27,7 +27,6 @@ export default class AdminNav extends Component {
                             span.label Total Teams
                             span.value=this.props.game.scoresheet.length
                     .game-buttons
-                        h2 Game Controls
                         if this.props.game.current_question==0
                             a.button.next-question(key="scoresheet-btn-start",href="#",onClick=this.props.beginGame) Begin Game
                         else if this.props.game.current_question<20

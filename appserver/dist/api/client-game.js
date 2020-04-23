@@ -14,14 +14,14 @@ module.exports = (app, models, corsOptions) => {
                 thisGame.waiting_room.forEach(team => {
                     team.users.forEach(user => {
                         if (user._id == request.body.userid) {
-                            output = team
+                            output = {status:"waiting_room",data:team}
                         }
                     })
                 })
                 thisGame.scoresheet.forEach(row => {
                     row.team.users.forEach(user => {
                         if (user._id == request.body.userid) {
-                            output = row.team
+                            output = {status:"active",data:row.team}
                         }
                     })
                 })

@@ -1,8 +1,11 @@
 .answer-form {
+    &.description {
+        background:lighten($blue,70%)
+    }
     &.section-title {
         background:$black;
         text-align:center;
-        h2 {
+        h2,p {
             color:$white;
         }
     }

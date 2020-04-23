@@ -39,11 +39,13 @@
     }
     .game-buttons {
         flex-basis:50%;
+        padding-top:1em;
         background:$off-white;
         display:flex;
-        flex-direction:column;
-        h2, .button {
+        .button {
             margin:0 1em .5em;
+            height:1.2em;
+            flex-basis:33%;
         }
     }
 }
