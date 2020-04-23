@@ -4,18 +4,7 @@ module.exports = (app, models, corsOptions) => {
 
     app.post('/clientgame/', cors(corsOptions), async (request, response) => {
         let thisGameModel = models["game"];
-        if (request.body.id && request.body.teamid) {
-            try {
-                let thisGame = await thisGameModel.findById(request.body.id)
-                    .populate({ path: "scoresheet.team", match: { _id: request.body.teamid } })
-                    .exec();
-                response.send(thisGame ? thisGame : { error: "not found" });
-            } catch (e) {
-                console.log("Error on get game plus team", e)
-                response.json({ err: "Error on Get Game Plus Team", msg: e })
-            }
-        }
-        else if (request.body.id && request.body.userid) {
+        if (request.body.id && request.body.userid) {
             try {
                 let thisGame = await thisGameModel.findById(request.body.id)
                     .populate({ path: "waiting_room", populate: { path: "team" } })
@@ -55,7 +44,7 @@ module.exports = (app, models, corsOptions) => {
         else if (request.body.game_code) {
             try {
                 let thisGame = await thisGameModel.find(request.body)
-                    .exec();
+                    .select("-scoresheet,-answer_basket,-waiting_room");
                 response.send(thisGame ? thisGame : { error: "not found" });
             } catch (e) {
                 console.log("Error on get game", e)

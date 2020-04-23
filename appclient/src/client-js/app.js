@@ -10,7 +10,6 @@ import ApiConnector from './components/api-connector'
 
 import io from 'socket.io-client'
 
-import parseHTML from './utils/parse-html'
 /*
 
     TODO:
@@ -30,24 +29,21 @@ class App extends Component {
     }
     checkForUser = () => {
         if (window.sessionStorage.getItem("userstate") == undefined) {
-            location.href="login.html"
+            location.href = "login.html"
         }
     }
     getUser = () => {
         this.state.user = JSON.parse(window.sessionStorage.getItem("userstate"))
         this.setState(this.state)
-        let queryData={
-            id:this.state.game._id,
-            userid:this.state.user._id
+        let queryData = {
+            id: this.state.game._id,
+            userid: this.state.user._id
         }
-        ApiConnector("read",JSON.stringify(queryData))
-            .then(res=>{
-                if (res.error) {
-                    this.showMessage("error",res.error)
-                }
-                else {
-                    this.state.team=res
-                    this.state.mode="active"
+        ApiConnector("read", JSON.stringify(queryData))
+            .then(res => {
+                if (!res.error) {
+                    this.state.team = res
+                    this.state.mode = "active"
                     this.setState(this.state)
                     this.refreshGame()
                 }
@@ -55,11 +51,11 @@ class App extends Component {
     }
     logout = e => {
         e.preventDefault();
-        this.state.game={}
-        this.state.team={}
+        this.state.game = {}
+        this.state.team = {}
         this.setState(this.state)
         window.sessionStorage.removeItem("userstate")
-        location.href="login.html"
+        location.href = "login.html"
     }
     socket = io('http://teamtrivia.localapi:5000')
     makeSocketConnection = () => {
@@ -83,10 +79,16 @@ class App extends Component {
         })
     }
     addPlayerMessage = msg => {
-        this.state.messages.player.push("plain",msg)
+        this.state.messages.player.push("plain", msg)
     }
     addHostMessage = msg => {
-        this.state.messages.host.push("plain",msg)
+        this.state.messages.host.push("plain", msg)
+    }
+    handleDroppedConnection = () => {
+        console.log("Connection to host lost")
+        this.state.io.socket = null
+        this.state.socket.joined = false
+        this.setState(this.state)
     }
     handleGameControl = msg => {
         console.log("Game Control:", msg)
@@ -95,30 +97,30 @@ class App extends Component {
             this.setState(this.state)
             this.refreshGame();
         }
-        else if (msg=="startgame") {
+        else if (msg == "startgame") {
             this.refreshGame();
-            this.showMessage("happy","The game has started! Hooray! Hooray for School!")
+            this.showMessage("happy", "The game has started! Hooray! Hooray for School!")
         }
         else if (typeof msg === "object") {
-            if (msg.label=="teamadded" && msg.data._id==this.state.team._id) {
-                this.state.mode="active"
+            if (msg.label == "teamadded" && msg.data._id == this.state.team._id) {
+                this.state.mode = "active"
                 this.setState(this.state)
                 this.newAnswerSheet()
                 console.log("Joined Game")
             }
         }
     }
-    showMessage = (className,msg) => {
-        this.state.messages.app.push({className:className,msg:msg})
+    showMessage = (className, msg) => {
+        this.state.messages.app.push({ className: className, msg: msg })
         this.setState(this.state)
     }
     componentDidMount() {
-        if (this.state.mode=="fromlobby") {
-            this.state.mode="noteam"
+        if (this.state.mode == "fromlobby") {
+            this.state.mode = "noteam"
             this.getUser()
             this.refreshGame()
         }
-        if (this.state.mode="noteam") {
+        if (this.state.mode = "noteam") {
             this.getUser()
         }
         if (this.state.mode == "fromurl") {
@@ -134,14 +136,13 @@ class App extends Component {
         error: "",
         team: {
             team_name: "",
-            answer_history:[]
+            answer_history: []
         },
         game: null,
         current_answer_sheet: null,
-        current_bid:1,
         bids: [1, 3, 5, 7],
         messages: {
-            current_message:"",
+            current_message: "",
             app: [{
                 className: "intro",
                 msg: "Welcome to the Game!"
@@ -152,22 +153,15 @@ class App extends Component {
     }
     makeBlankAnswerSheet = qnum => {
         let answers = [this.blankAnswer(null)]
-        if (qnum==5) {
-            answers = [this.blankAnswer(2),this.blankAnswer(2),this.blankAnswer(2),this.blankAnswer(2)]
+        if (qnum == 5) {
+            answers = [this.blankAnswer(2), this.blankAnswer(2), this.blankAnswer(2), this.blankAnswer(2)]
         }
-        if (qnum==15) {
-            answers = [this.blankAnswer(5),this.blankAnswer(5),this.blankAnswer(5),this.blankAnswer(5)]
+        if (qnum == 15) {
+            answers = [this.blankAnswer(5), this.blankAnswer(5), this.blankAnswer(5), this.blankAnswer(5)]
         }
         return {
             q: this.state.game.current_question,
             answers: answers
-        }
-    }
-    bidRefreshMap = () => {
-        return {
-            4: [1, 3, 5, 7],
-            9: [2, 4, 6, 8],
-            14: [2, 4, 6, 8],
         }
     }
     blankAnswer = bid => {
@@ -186,6 +180,7 @@ class App extends Component {
         "Bid from 2 - 20 in even numbers. If you are wrong, HALF of your bid will be deducted from your score.",
     ]
     instructionMap = [0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 3, 4, 4, 4, 4, 5, 4, 4, 4, 4, 6]
+
     setLocalStorage = () => {
         if (this.state.game._id != null) {
             window.sessionStorage.setItem("gamestate", JSON.stringify(this.state));
@@ -204,12 +199,7 @@ class App extends Component {
         var f = window.sessionStorage.getItem("gamestate")
     }
 
-    handleDroppedConnection = () => {
-        console.log("Connection to host lost")
-        this.state.io.socket = null
-        this.state.socket.joined = false
-        this.setState(this.state)
-    }
+
     initGameFromHash = () => {
         let url_hash = this.getUrlParameter("pqid")
         if (!url_hash) {
@@ -217,17 +207,17 @@ class App extends Component {
             this.setState(this.state)
         }
         else {
-            console.log("Url",url_hash)
+            console.log("Url", url_hash)
             ApiConnector("read", JSON.stringify({ game_code: url_hash }))
                 .then(res => {
                     if (res.length == 1) {
                         this.state.game = Object.assign({}, this.state.game, res[0])
-                        this.state.mode="noteam"
+                        this.state.mode = "noteam"
                         this.setState(this.state)
                     }
                     else {
                         this.state.error = "No game specified. Bad URL"
-                        this.state.mode="noteam"
+                        this.state.mode = "noteam"
                         this.setState(this.state)
                     }
                 })
@@ -254,30 +244,30 @@ class App extends Component {
         this.setState(this.state);
     }
     handleMessageChange = e => {
-        this.state.messages.current_message=e.target.value
+        this.state.messages.current_message = e.target.value
         this.setState(this.state)
     }
     messageHost = () => {
-        this.socket.emit("clientmsg",this.state.messages.current_message)
-        this.state.messages.current_message=""
+        this.socket.emit("clientmsg", this.state.messages.current_message)
+        this.state.messages.current_message = ""
         this.setState(this.state)
     }
-    
+
     messagePlayers = () => {
-        this.socket.emit("playerchat",this.state.user.username+": " +this.state.messages.current_message)
-        this.state.messages.current_message=""
+        this.socket.emit("playerchat", this.state.user.username + ": " + this.state.messages.current_message)
+        this.state.messages.current_message = ""
         this.setState(this.state)
     }
-    
+
     handleIntroFormSubmit = e => {
-        ApiConnector("addTeam", JSON.stringify({ _id: this.state.game._id, team: { team_name: this.state.team.team_name, users:[this.state.user] } }))
+        ApiConnector("addTeam", JSON.stringify({ _id: this.state.game._id, team: { team_name: this.state.team.team_name, users: [this.state.user] } }))
             .then(res => {
                 if (res._id) {
                     this.state.mode = "waiting_room"
                     this.state.team = res
-                    this.state.team.answer_history=[]
+                    this.state.team.answer_history = []
                     this.setState(this.state)
-                    this.socket.emit("clientmsg", "team joined: "+ this.state.team.team_name)
+                    this.socket.emit("clientmsg", "teamjoined")
                 }
                 else if (res.dupe) {
                     this.state.error = "Duplicate Team name."
@@ -289,14 +279,14 @@ class App extends Component {
     }
     refreshGame = () => {
         let formData = {
-            id: this.state.game._id,
-            teamid: this.state.team._id
+            id: this.state.game._id
         }
         ApiConnector("read", JSON.stringify(formData))
             .then(res => {
                 if (res._id) {
                     this.state.game = res
                     this.setState(this.state)
+                    this.checkBids()
                     this.newAnswerSheet()
                 }
                 else {
@@ -305,31 +295,70 @@ class App extends Component {
             })
     }
     updateTeam = () => {
-       ApiConnector("update",JSON.stringify(this.state.team),"team")
-        .then(res=>{
-            if (res.error) {
-                this.showMessage("error",res.error)
-            }
-            else {
-                this.state.team=res
-                this.setState(this.state)
-            }
-        }) 
+        ApiConnector("update", JSON.stringify(this.state.team), "team")
+            .then(res => {
+                if (res.error) {
+                    this.showMessage("error", res.error)
+                }
+                else {
+                    this.state.team = res
+                    this.setState(this.state)
+                }
+            })
     }
     newAnswerSheet = () => {
-        this.state.current_answer_sheet = this.makeBlankAnswerSheet(this.state.game.current_question)
-        this.setState(this.state)
+        if (this.state.team.answer_history.filter(answer => { return answer.q == this.state.game.current_question }).length == 0) {
+            this.state.current_answer_sheet = this.makeBlankAnswerSheet(this.state.game.current_question)
+            this.setState(this.state)
+            this.checkBids()
+        }
+        else {
+            this.state.current_answer_sheet = null
+            this.setState(this.state)
+        }
     }
     handleAnswerSubmit = e => {
         e.preventDefault()
-        let formData = { gameid:this.state.game._id,teamid: this.state.team._id, answer_sheet: this.state.current_answer_sheet }
+
+        let answerSheet = this.state.current_answer_sheet
+        if ([5,15].indexOf(this.state.game.current_question)==-1) {
+            console.log("add bid")
+            answerSheet.answers[0].bid = this.state.current_bid
+        }
+        console.log(answerSheet,this.state.current_bid)
+        let formData = { gameid: this.state.game._id, teamid: this.state.team._id, answer_sheet: answerSheet }
         ApiConnector("submitAnswer", JSON.stringify(formData))
             .then(res => {
-                this.state.team.answer_history.push(this.state.game.current_question)
-                this.state.current_answer_sheet = null
-                this.setState(this.state)
-                this.socket.emit("clientmsg", "answerdropped")
+                this.state.tea
+                if (res.error) {
+                    console.log(res.error)
+                }
+                else {
+                    this.state.team.answer_history.push({ q: this.state.game.current_question, bid: this.state.current_bid })
+                    this.state.current_answer_sheet = null
+                    this.setState(this.state)
+                    this.updateTeam()
+                    this.checkBids()
+                    this.socket.emit("clientmsg", "answerdropped")
+                }
             })
+    }
+    checkBids = () => {
+        if ((this.state.game.current_question + 1) % 5 == 0) {
+            console.log("Bonus question")
+        }
+        else {
+            let tempBids = this.state.game.current_question < 10 ? [1, 3, 5, 7] : [2, 4, 6, 8]
+            let questions = [[1, 2, 3, 4], [6, 7, 8, 9], [11, 12, 13, 14], [16, 17, 18, 19]][parseInt(this.state.game.current_question / 5)]
+            this.state.team.answer_history.forEach(answer => {
+                if (questions.indexOf(answer.q) > -1) {
+                    tempBids.splice(tempBids.indexOf(answer.bid), 1)
+                }
+            })
+            this.state.bids = tempBids
+            this.state.current_bid = tempBids[0]
+            this.setState(this.state)
+        }
     }
     changeAnswer = (e, numAnswer) => {
         e.preventDefault()
@@ -337,7 +366,6 @@ class App extends Component {
         this.setState(this.state)
     }
     changeBid = e => {
-        this.state.current_answer_sheet.answers[0].bid = e.target.options[e.target.selectedIndex].value
         this.state.current_bid = e.target.options[e.target.selectedIndex].value
         this.setState(this.state)
         console.log("Bid chnaged", this.state)

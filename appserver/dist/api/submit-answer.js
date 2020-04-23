@@ -17,7 +17,7 @@ module.exports = (app, models, corsOptions) => {
                 response.json({ msg: "success", data: thisRow })
             }
             catch (e) {
-                response.json({ res: "Error on answer submitted", msg: e })
+                response.json({ error: "Error on answer submitted", msg: e })
                 console.log("ERROR ON ANSWER SUBMIT:", e)
             }
         })

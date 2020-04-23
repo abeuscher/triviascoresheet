@@ -10,6 +10,7 @@ export default class LoginBar extends Component {
                 .login-bar
                     p="logged in as "
                         strong=this.props.user.username
+                        a(href="lobby.html") lobby
                         a(href="#",onClick=this.props.logout) logout
         `
     }

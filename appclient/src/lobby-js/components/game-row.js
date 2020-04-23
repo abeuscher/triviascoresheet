@@ -9,7 +9,7 @@ export default class GameRow extends Component {
             .game-row.flex
                 .column.two-fifth
                     p.title=this.props.game.game_title
-                    .description=this.props.game.game_description
+                    .description(dangerouslySetInnerHTML={__html:this.props.game.game_description})
                 .column.fifth
                     p.status=this.props.game.game_status
                 .column.fifth

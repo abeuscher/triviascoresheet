@@ -26,10 +26,6 @@ export default class AdminNav extends Component {
                         .item.total-teams
                             span.label Total Teams
                             span.value=this.props.game.scoresheet.length
-                        .item.player-link
-                            span.label Game link
-                            span.value
-                                a(href="http://teamtrivia.local/?pqid="+this.props.game.game_code,target="_blank")="http://teamtrivia.local/?pqid="+this.props.game.game_code
                     .game-buttons
                         h2 Game Controls
                         if this.props.game.current_question==0

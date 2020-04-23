@@ -133,6 +133,9 @@ class App extends Component {
         if (msg == "answerdropped") {
             this.refreshGame();
         }
+        else if (msg == "teamjoined") {
+            this.refreshGame();
+        }
         else {
             this.showMessage(msg)
         }

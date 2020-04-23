@@ -53,9 +53,10 @@ function AppSchemas() {
                 type: mongoose.Schema.Types.ObjectId
             }],
             answer_history: [{
-                question:{
-                    type:Number,
-                    unique:true
+                q: {
+                    type: Number
+                }, bid: {
+                    type: Number
                 }
             }],
             created: {
@@ -157,7 +158,8 @@ function AppSchemas() {
                             type: Number
                         },
                         scored: {
-                            type: Number
+                            type: Number,
+                            default:0
                         },
                         correct: {
                             type: Boolean,

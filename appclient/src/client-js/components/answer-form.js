@@ -38,7 +38,6 @@ export default class AnswerForm extends Component {
                             input(type="text",name="current_answer",onChange=e=>{this.props.changeAnswer(e,0)},value=this.props.answer_sheet.answers[0].content)
                         label bid
                             select(onChange=this.props.changeBid,value=this.props.currentBid)
-                                option(value=this.props.currentBid)=this.props.currentBid
                                 for bid,idx in this.props.bids
                                     option(key="bid-option-"+idx,value=bid)=bid
                     a.button(onClick=this.props.submitAnswer) Submit Answer
