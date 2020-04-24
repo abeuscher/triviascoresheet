@@ -19,7 +19,7 @@ services:
       context: ./appclient
     container_name: 'appclient'
     restart: 'always'
-    hostname: teamtrivia.local
+    hostname: ${SERVER_HOSTNAME}
     ports:
       - "80:80"
       - "443:443"
@@ -36,9 +36,9 @@ services:
       context: ./
     container_name: 'appserver'
     restart: 'always'
-    hostname: teamtrivia.localapi
+    hostname: ${SERVER_HOSTNAME}
     ports:
-      - "5000:5000"
+      - ${API_PORT}
     depends_on:
       - mongodb
     links:

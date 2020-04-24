@@ -1,6 +1,9 @@
-function apiConnector(action, data, type) {
+const envSettings = require("../../env.js")()
 
-    let rootpath = "http://localhost:5000/";
+module.exports=(action, data) => {
+
+    let rootpath = envSettings.api;
+
     let paths = {
         login: rootpath + "login/",
         signup: rootpath + "signup/",
@@ -15,5 +18,3 @@ function apiConnector(action, data, type) {
     }, { body: data }))
         .then(res => res.json())
 }
-
-module.exports=apiConnector

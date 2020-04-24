@@ -1,6 +1,8 @@
-function apiConnector(action, data, type) {
+const envSettings = require("../../env.js")()
 
-    let rootpath = "http://teamtrivia.localapi:5000/";
+module.exports=(action, data, type) => {
+
+    let rootpath = envSettings.api;
     let paths = {
         getGame: rootpath + "getgame/",
         create: rootpath + "create/" + type,
@@ -20,5 +22,3 @@ function apiConnector(action, data, type) {
     }, { body: data }))
         .then(res => res.json())
 }
-
-module.exports=apiConnector
