@@ -1,5 +1,45 @@
+.client-chat-widget {
+    margin:$gutter-width;
+    padding:$gutter-width/2;
+    border:1px solid $blue;
+    .messages {
+        .username {
+            font-size:.8em;
+            font-weight:bold;
+            color:lighten($blue,30%);
+        }
+    }
+    .column {
+        @include nice-transition();
+        flex-basis: 50%;
+        max-height: 20vh;
+        overflow: hidden;
+        &.messages {
+            flex-basis:60%;
+            &.wide {
+                flex-basis:100%;
+            }
+        }
+        &.chat {
+            flex-basis:40%;
+            textarea {
+                width:100%;
+
+            }
+        }
+        .inner {
+            padding: .5em;
+            max-height: 15vh;
+            &.scrollable {
+                overflow-y: scroll;
+            }
+        }
+    }
+}
+
 .chat-widget {
     width: 100%;
+
     .box {
         label {
             cursor: pointer;
@@ -11,6 +51,7 @@
             text-transform: uppercase;
             @include nice-transition();
         }
+
         .active-area {
             display: flex;
             flex-wrap: wrap;

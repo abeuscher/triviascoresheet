@@ -30,6 +30,8 @@ class App extends Component {
 
     logout = () => {
         window.sessionStorage.removeItem("userstate")
+        window.sessionStorage.removeItem("userstate")
+        window.sessionStorage.removeItem("adminstate")
     }
     changeView = view => {
         this.state.view = view

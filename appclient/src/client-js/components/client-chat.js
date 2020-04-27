@@ -7,7 +7,7 @@ export default class ClientChat extends Component {
     render() {
         let unread = this.props.io.gamechat.messages.filter(msg=>{return msg.status=="unread"}).length
         return pug`
-            .chat-widget
+            .client-chat-widget
                 if this.props.io
                     .column.messages.wide
                         .inner.scrollable

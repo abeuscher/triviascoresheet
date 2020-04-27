@@ -73,6 +73,8 @@ class App extends Component {
     }
     logout = () => {
         window.sessionStorage.removeItem("userstate")
+        window.sessionStorage.removeItem("adminstate")
+        window.sessionStorage.removeItem("gamestate")
         this.state.user = {}
         this.setState(this.state)
         location.href = "login.html"

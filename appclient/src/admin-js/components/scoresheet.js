@@ -47,8 +47,8 @@ export default class Scoresheet extends Component {
                                 key="answer-box-normal-"+row_idx+"-"+c,
                                 sheet=JSON.stringify(item),
                                 onClick=this.props.sendToBasket,
-                                labelClass=item.answers[0].correct ? "true" : "false",
-                                cellValue=item.score
+                                labelClass=[5,15].indexOf(c)>-1 ? "true" : item.answers[0].correct ? "true" : "false",
+                                cellValue=[5,10,15,20].indexOf(c)>-1 ? item.score : item.answers[0].bid
                                 )
                             - total = total + item.score           
                         else

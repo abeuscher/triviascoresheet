@@ -58,6 +58,7 @@ class App extends Component {
         this.state.team = {}
         this.setState(this.state)
         window.sessionStorage.removeItem("userstate")
+        window.sessionStorage.removeItem("gamestate")
         location.href = "login.html"
     }
     socket = io('http://teamtrivia.localapi:5000')
@@ -400,7 +401,6 @@ class App extends Component {
     render() {
 
         return pug`
-            #wrapper
                 if this.state.error!=""
                     h2.error=this.state.error
                 else
@@ -408,36 +408,37 @@ class App extends Component {
                         user=this.state.user,
                         logout=this.logout
                         )
-                    .flex
-                        .column.three-fifth
-                            if this.state.mode=="noteam"
-                                GameSigninForm(
-                                    game=this.state.game,
-                                    team=this.state.team,
-                                    onChange=this.handleFormChange,
-                                    onSubmit=this.handleIntroFormSubmit
+                    #wrapper
+                        .flex
+                            .column.three-fifth
+                                if this.state.mode=="noteam"
+                                    GameSigninForm(
+                                        game=this.state.game,
+                                        team=this.state.team,
+                                        onChange=this.handleFormChange,
+                                        onSubmit=this.handleIntroFormSubmit
+                                        )
+                                if this.state.mode=="active" || this.state.mode=="waiting_room"
+                                    AnswerForm(
+                                        mode=this.state.mode,
+                                        game=this.state.game,
+                                        team=this.state.team,
+                                        answer_sheet=this.state.current_answer_sheet,
+                                        bids=this.state.bids,
+                                        currentBid=this.state.current_bid,
+                                        submitAnswer=this.handleAnswerSubmit,
+                                        instructions=this.instructionStrings,
+                                        instructionMap=this.instructionMap,
+                                        changeAnswer=this.changeAnswer,
+                                        changeBid=this.changeBid
                                     )
-                            if this.state.mode=="active" || this.state.mode=="waiting_room"
-                                AnswerForm(
-                                    mode=this.state.mode,
-                                    game=this.state.game,
-                                    team=this.state.team,
-                                    answer_sheet=this.state.current_answer_sheet,
-                                    bids=this.state.bids,
-                                    currentBid=this.state.current_bid,
-                                    submitAnswer=this.handleAnswerSubmit,
-                                    instructions=this.instructionStrings,
-                                    instructionMap=this.instructionMap,
-                                    changeAnswer=this.changeAnswer,
-                                    changeBid=this.changeBid
+                            .column.two-fifth.chat-bucket
+                                ClientChat(
+                                    io=this.state.io,
+                                    markMessagesAsRead=this.markMessagesAsRead,
+                                    changeChat=this.changeChat,
+                                    sendChat=this.sendChat
                                 )
-                        .column.two-fifth.chat-bucket
-                            ClientChat(
-                                io=this.state.io,
-                                markMessagesAsRead=this.markMessagesAsRead,
-                                changeChat=this.changeChat,
-                                sendChat=this.sendChat
-                            )
             
         `
     }

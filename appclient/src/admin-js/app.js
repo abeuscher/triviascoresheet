@@ -123,16 +123,6 @@ class App extends Component {
                     status:"unread"
                 }]
             },
-            playerchat: {
-                label: "Player Chat",
-                current_message: "",
-                messages: [{
-                    className: "intro",
-                    msg: "This is where you can chat with players",
-                    data: null,
-                    status:"unread"
-                }]
-            },
             gamechat: {
                 label: "Game Chat",
                 current_message: "",
@@ -182,8 +172,8 @@ class App extends Component {
     }
     logout = () => {
         window.sessionStorage.removeItem("userstate")
-        this.state.user = {}
-        this.setState(this.state)
+        window.sessionStorage.removeItem("adminstate")
+        window.sessionStorage.removeItem("gamestate")
         location.href = "login.html"
     }
     componentDidUpdate() {

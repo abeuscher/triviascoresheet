@@ -1,0 +1,30 @@
+.page-header {
+    background:url("/images/bg_header.jpg") no-repeat;
+    background-size:cover;
+    background-position:center;
+    flex-direction:column;
+    align-items:center;
+    display:flex;
+    .logo {
+        margin-top:$gutter-width/4;
+        max-height:100px;
+        display:inline-block;
+        img {
+            max-width:100%;
+            height:100px;
+            width:auto;
+        }
+    }
+    .site-title {
+        color:$white;
+        font-family:$header-font;
+        text-transform: uppercase;
+        letter-spacing:5px;
+        margin:0;
+        padding:0;
+        h1 {
+            font-size:1.5em;
+            margin:$gutter-width/4 0;
+        }
+    }
+}
