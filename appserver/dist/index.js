@@ -9,6 +9,7 @@ const AddTeam = require("./api/add-team")
 const GetGame = require("./api/get-game")
 const ClientGame = require("./api/client-game")
 const Create = require("./api/create")
+const Get = require("./api/get")
 const Delete = require("./api/delete")
 const Login = require("./api/login")
 const Signup = require("./api/signup")
@@ -58,6 +59,7 @@ let server = app.listen(5000, () => {
     Delete(app, models, corsOptions)
     UpdateGame(app, models, corsOptions)
     Create(app, models, corsOptions)
+    Get(app, models, corsOptions)
 
 });
 io(server)

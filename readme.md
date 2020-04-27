@@ -8,9 +8,6 @@ Todo:
     - Chat:
         - Player to host
         - Host to player
-        - Game specific rooms
-    - Send team from scoresheet to waiting room
-    - Delete team from game
     - manually alter score on sheet
     - User row to scoresheet fails on 2nd time
     - Make 10 Q game work

@@ -6,7 +6,7 @@ module.exports=(action, data, type) => {
     let paths = {
         getGame: rootpath + "getgame/",
         create: rootpath + "create/" + type,
-        get: rootpath + "game/" + type,
+        get: rootpath + "get/" + type,
         update: rootpath + "update/" + type,
         updateGame: rootpath + "updategame/",
         delete: rootpath + "delete/" + type

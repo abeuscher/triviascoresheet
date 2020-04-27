@@ -11,10 +11,11 @@ import LoginBar from './components/login-bar'
 import AdminNav from './components/admin-nav'
 import GameForm from './components/game-form'
 import GameManager from './components/game-manager'
+import UserManager from './components/user-manager'
 import Scoresheet from './components/scoresheet'
 import AnswerBasket from './components/answer-basket'
 import WaitingRoom from './components/waiting-room'
-import ChatBox from '../common-js/chat-box'
+import ChatBox from './components/chat-box'
 /*
 
     App flow:
@@ -151,6 +152,9 @@ class App extends Component {
         }, {
             label: "Create New Game",
             action: this.newGame
+        },{
+            label: "Manage Users",
+            action: this.fetchUsers
         }]
     }
     setLocalStorage = () => {
@@ -276,6 +280,15 @@ class App extends Component {
                 this.state.games = res
                 this.setState(this.state)
                 console.log("retrieved games:", res)
+            })
+    }
+    fetchUsers = () => {
+        ApiConnector("get","","user")
+            .then(res=>{
+                console.log("Users:",res)
+                this.state.mode="usermanager"
+                this.state.users=res
+                this.setState(this.state)
             })
     }
     addTeamToSheet = team => {
@@ -459,6 +472,22 @@ class App extends Component {
         })
         this.setState(this.state)
     }
+    changeUserPrivileges = e => {
+        this.state.users[e.target.getAttribute("data-idx")][e.target.name]=e.target.checked;
+        this.setState(this.state)
+        ApiConnector("update",JSON.stringify(this.state.users[e.target.getAttribute("data-idx")]),"user")
+            .then(res=>{
+                this.fetchUsers()
+            })  
+    }
+    deleteUser = user => {
+        if (confirm("Are you sure you want to delete this user?")) {
+            ApiConnector("delete",JSON.stringify(user),"user")
+                .then(res=>{
+                    this.fetchUsers()
+                })
+        }
+    }
     render() {
         return pug`
             LoginBar(
@@ -480,6 +509,12 @@ class App extends Component {
                         playGame=this.playGame,
                         deleteGame=this.deleteGame
                         )
+                else if this.state.mode=="usermanager"
+                    UserManager(
+                        users=this.state.users,
+                        changeUserPrivileges=this.changeUserPrivileges,
+                        deleteUser=this.deleteUser
+                    )
                 else
                     
                     if this.state.mode=="edit"

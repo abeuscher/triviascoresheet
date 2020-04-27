@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom'
 import GameSigninForm from './components/game-signin-form'
 import AnswerForm from './components/answer-form'
 import LoginBar from './components/login-bar'
-import ChatBox from '../common-js/chat-box'
+import ClientChat from './components/client-chat'
 import DefaultGameState from '../common-js/default-game-state'
 
 import ApiConnector from './components/api-connector'
@@ -431,9 +431,9 @@ class App extends Component {
                                     changeAnswer=this.changeAnswer,
                                     changeBid=this.changeBid
                                 )
-                        .column.two-fifth
-                            ChatBox(
-                                messages=this.state.io,
+                        .column.two-fifth.chat-bucket
+                            ClientChat(
+                                io=this.state.io,
                                 markMessagesAsRead=this.markMessagesAsRead,
                                 changeChat=this.changeChat,
                                 sendChat=this.sendChat
