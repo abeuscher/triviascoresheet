@@ -1,20 +1,62 @@
 .chat-widget {
-    padding:$gutter-width/2 $gutter-width;
-    margin:$gutter-width/2 $gutter-width 0;
-    border:1px solid $blue;
-    background:lighten($blue,30%);
-    color:$white;
-    display:block;
+    width: 100%;
     .box {
-        display:block;
-        &.chat-window {
-            display:flex;
-            flex-wrap:wrap;
-            textarea {
-                flex-basis:100%;
-                color:black;
-                font-size:1.2em;
-                min-height:100px;
+        label {
+            cursor: pointer;
+            display: block;
+            flex-basis: 100%;
+            background: black;
+            color: white;
+            padding: $gutter-width/4;
+            text-transform: uppercase;
+            @include nice-transition();
+        }
+        .active-area {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            .column {
+                @include nice-transition();
+                flex-basis: 50%;
+                max-height: 20vh;
+                overflow: hidden;
+                &.messages {
+                    flex-basis:60%;
+                    &.wide {
+                        flex-basis:100%;
+                    }
+                }
+                &.chat {
+                    flex-basis:40%;
+                    textarea {
+                        width:100%;
+
+                    }
+                }
+                .inner {
+                    padding: .5em;
+                    max-height: 15vh;
+                    &.scrollable {
+                        overflow-y: scroll;
+                    }
+                }
+            }
+        }
+        input[type="checkbox"] {
+            display: none;
+            &:checked {
+                + .active-area {
+                    label {
+                        color: $blue;
+                        background:$white;
+                    }
+                    .column {
+                        max-height: 0;
+                        .inner {
+                            max-height: 0;
+                        }
+                    }
+                }
             }
         }
     }

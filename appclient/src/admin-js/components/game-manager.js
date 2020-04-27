@@ -7,7 +7,6 @@ export default class GameManager extends Component {
     }
 
     render() {
-        console.log(this.props.games)
         return pug`
             .manager-container.padded-column.section-title
                 h2 Edit or Delete Games:

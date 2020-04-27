@@ -42,5 +42,8 @@
       "tinymce":"5.2.0",
       "@tinymce/tinymce-react":"3.5.0",
       "uglifyify": "^5.0.2"
-    }
+    },
+    "resolutions": {
+      "@babel/preset-env": "7.8.4"
+     }
   }

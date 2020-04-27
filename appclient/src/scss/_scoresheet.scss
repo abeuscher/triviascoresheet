@@ -58,6 +58,14 @@
             font-size:1.1em;
         }      
     }
+    .team-column {
+        cursor: pointer;
+        @include nice-transition();
+        &:hover {
+            background:$blue!important;
+            color:$white;
+        }
+    }
     .answer-box {
         flex-basis: 3.1%;
         display: flex;

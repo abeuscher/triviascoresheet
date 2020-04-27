@@ -5,32 +5,45 @@ module.exports = server => {
         cookie: false
     });
     let host = null;
+    let runningGames = [{
+        host:null,
+        game:null
+    }]
     io.on('connection', (socket) => {
-        socket.emit("welcome", "Hey there");
-        console.log('a user connected');
-        socket.on('chat message', (msg) => {
-            console.log('message: ' + msg);
-        });
-        socket.on("host message", (msg) => {
-            console.log('message: ' + msg);
-        });
-        socket.on("playermessage", (msg) => {
-            io.broadcast.emit("playermessage",msg)
-        });
-        socket.on("clientmsg", msg => {
+
+        //Client Joins
+        socket.on("clientjoin", (data)=>{
+            console.log("Client joined",data)
+            // Join channels for player, team, and host.
+            socket.join(data.userid)
+            socket.join(data.gameid)
+
+            socket.on("gamechat",data=>{
+                console.log("gamechat",data)
+                io.to(data.gameid).emit("gamechat",data)
+            })     
+            socket.on("gamestatus",data=>{
+                io.to(data.gameid).emit("gamestatus",data)
+            })
             if (host) {
-                host.emit("clientmsg", msg)
+                socket.on("hostchat",data=>{
+                    console.log("hostchat",data)
+                    io.to(host).emit("playerchat",data)
+                })                
             }
         })
-        socket.on("identify host", msg => {
-            host = socket;
-            host.on("gamecontrol", (msg) => {
-                io.emit("gamecontrol", msg);
-            });
-            host.on("hostmessage", (msg) => {
-                io.emit("hostmessage", msg);
-            });
-    
+
+        //Host joins
+        socket.on("hostjoin", (data)=>{
+            socket.join(data.gameid)
+
+            socket.on("gamechat",data=>{
+                console.log("gamechat",data)
+                io.to(data.gameid).emit("gamechat",data)
+            })  
+            socket.on("gamestatus",data=>{
+                io.to(data.gameid).emit("gamestatus",data)
+            })
         })
     
         socket.on('disconnect', () => {

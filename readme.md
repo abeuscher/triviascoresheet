@@ -4,6 +4,7 @@ Work in progress. Using Docker, Next, and Mongoose with Mongo DB.
 
 Todo:
  v1
+    - Form validation / error feedback
     - Chat:
         - Player to host
         - Host to player
@@ -22,3 +23,11 @@ Todo:
     - Multiple players on a team (figure out how to manage controls)
     - Add "buzzer" for lightning round (would be a fun finisher and a way to actually award prizes)
     - Could also do this through chat rather than video - fire text questions at players and show their answers in real time to audience.
+
+    CHAT
+
+    When client and host join, they emit game id.
+    When client joins, their team id is also broadcast
+    host: join, game id
+    client: join, game id, team id
+    App creates an entity called gameid and adds players to it

@@ -37,7 +37,7 @@ export default class Scoresheet extends Component {
             for row,row_idx in this.props.game.scoresheet
                 - let total = 0;
                 .score-row.flex(key="scoresheet-form-row-"+row_idx)
-                    .team-column(key="scoresheet-team-column-"+row_idx)
+                    .team-column(key="scoresheet-team-column-"+row_idx,onClick=()=>{this.props.sendTeamToWaitingRoom(row.team)})
                         h2(key="scoresheet-team-label-"+row_idx)=row.team.team_name
                     each i,idx in theCount
                         - let c = idx + 1

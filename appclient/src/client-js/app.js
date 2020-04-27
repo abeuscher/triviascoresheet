@@ -4,7 +4,8 @@ import ReactDOM from 'react-dom'
 import GameSigninForm from './components/game-signin-form'
 import AnswerForm from './components/answer-form'
 import LoginBar from './components/login-bar'
-import ChatBox from './components/chat-box'
+import ChatBox from '../common-js/chat-box'
+import DefaultGameState from '../common-js/default-game-state'
 
 import ApiConnector from './components/api-connector'
 
@@ -25,7 +26,9 @@ class App extends Component {
         this.checkForUser()
         let saveState = this.getLocalStorage()
         this.state = saveState ? saveState : this.defaultState
-        this.makeSocketConnection()
+        if (saveState) {
+            this.state.joined_game_chat = false
+        }
     }
     checkForUser = () => {
         if (window.sessionStorage.getItem("userstate") == undefined) {
@@ -42,7 +45,7 @@ class App extends Component {
         ApiConnector("read", JSON.stringify(queryData))
             .then(res => {
                 if (!res.error) {
-                    this.state.mode=res.status
+                    this.state.mode = res.status
                     this.state.team = res.data
                     this.setState(this.state)
                     this.refreshGame()
@@ -60,64 +63,89 @@ class App extends Component {
     socket = io('http://teamtrivia.localapi:5000')
     makeSocketConnection = () => {
         this.socket.on('connect', () => {
+            console.log("sending", {
+                gameid: this.state.game._id,
+                teamid: this.state.team._id,
+                userid: this.state.user._id,
+                username: this.state.user.username
+            })
+            this.socket.emit("clientjoin", {
+                gameid: this.state.game._id,
+                teamid: this.state.team._id,
+                userid: this.state.user._id,
+                username: this.state.user.username
+            })
+
+            this.socket.on("gamechat", msg => {
+                this.getMessage("gamechat", msg)
+            })
+            this.socket.on("gamestatus", msg => {
+                this.getMessage("gamestatus", msg)
+                this.handleGameControl(msg)
+            })
+            this.socket.on("playerchat", msg => {
+                this.getMessage("player", msg)
+            })
+            this.socket.on("hostchat", msg => {
+                this.getMessage("host", msg)
+            })
+            this.socket.on('disconnect', () => {
+                console.log("Socket dropped")
+            });
+            this.state.joined_game_chat = true;
+            this.setState(this.state)
             console.log("Socket connected")
         });
-        this.socket.on('disconnect', function () {
-            console.log("Socket dropped")
-        });
-        this.socket.on('host message', msg => {
-            console.log(msg)
-        });
-        this.socket.on("gamecontrol", msg => {
-            this.handleGameControl(msg)
-        })
-        this.socket.on("playerchat", msg => {
-            this.addPlayerMessage(msg)
-        })
-        this.socket.on("hostchat", msg => {
-            this.addHostMessage(msg)
+
+
+
+    }
+    sendMessage = (dest, msg) => {
+        console.log("Send message", dest, msg)
+        this.socket.emit(dest, {
+            gameid: this.state.game._id,
+            teamid: this.state.team._id,
+            userid: this.state.user._id,
+            username: this.state.user.username,
+            msg: msg,
+            status: "unread"
         })
     }
-    addPlayerMessage = msg => {
-        this.state.messages.player.push("plain", msg)
-    }
-    addHostMessage = msg => {
-        this.state.messages.host.push("plain", msg)
-    }
-    handleDroppedConnection = () => {
-        console.log("Connection to host lost")
-        this.state.io.socket = null
-        this.state.socket.joined = false
+    getMessage = (dest, data) => {
+        console.log(dest, data)
+        this.state.io[dest].messages.push(data)
         this.setState(this.state)
     }
-    handleGameControl = msg => {
-        console.log("Game Control:", msg)
-        if (msg == "refreshdb") {
-            this.setState(this.state)
-            this.refreshGame();
+
+    handleDroppedConnection = () => {
+        console.log("Connection to host lost. Reconnecting...")
+        this.socket = io('http://teamtrivia.localapi:5000')
+        this.setState(this.state)
+    }
+    handleGameControl = data => {
+        if (data.action=="refresh") {
+            this.refreshGame()
         }
-        else if (msg == "startgame") {
-            this.refreshGame();
-            this.showMessage("happy", "The game has started! Hooray! Hooray for School!")
-        }
-        else if (typeof msg === "object") {
-            if (msg.label == "teamadded" && msg.data._id == this.state.team._id) {
-                this.state.mode = "active"
+        if (data.action=="teamadded") {
+            if (data._id==this.state.team._id) {
+                this.state.io.gamestatus.messages.push({className:"local",msg:"You have been added to the game"})
+                this.state.mode="active"
                 this.setState(this.state)
-                this.newAnswerSheet()
-                console.log("Joined Game")
             }
         }
     }
     showMessage = (className, msg) => {
-        this.state.messages.app.push({ className: className, msg: msg })
+        this.state.io.gamestatus.messages.push({ className: className, msg: msg })
         this.setState(this.state)
     }
     componentDidMount() {
+
         if (this.state.mode == "fromlobby") {
-            this.state.mode = "noteam"
+            this.state.mode = "noteam" 
             this.getUser()
             this.refreshGame()
+            this.state.joined_game_chat = false
+            this.setState(this.state)
         }
         if (this.state.mode = "noteam") {
             this.getUser()
@@ -125,31 +153,17 @@ class App extends Component {
         if (this.state.mode == "fromurl") {
             this.getUser()
             this.initGameFromHash()
+            this.state.joined_game_chat = false
+            this.setState(this.state)
         }
     }
     componentDidUpdate() {
+        if (!this.state.joined_game_chat) {
+            this.makeSocketConnection()
+        }
         this.setLocalStorage()
     }
-    defaultState = {
-        mode: "fromurl", //fromurl,fromlobby active, waiting, over
-        error: "",
-        team: {
-            team_name: "",
-            answer_history: []
-        },
-        game: null,
-        current_answer_sheet: null,
-        bids: [1, 3, 5, 7],
-        messages: {
-            current_message: "",
-            app: [{
-                className: "intro",
-                msg: "Welcome to the Game!"
-            }],
-            host: [],
-            player: []
-        }
-    }
+    defaultState = DefaultGameState("fromurl")
     makeBlankAnswerSheet = qnum => {
         let answers = [this.blankAnswer(null)]
         if (qnum == 5) {
@@ -242,22 +256,26 @@ class App extends Component {
         this.state.team[e.target.name] = e.target.value
         this.setState(this.state);
     }
-    handleMessageChange = e => {
-        this.state.messages.current_message = e.target.value
+    changeChat = e => {
+        e.preventDefault()
+        this.state.io[e.target.getAttribute("data-key")].current_message = e.target.value
         this.setState(this.state)
     }
-    messageHost = () => {
-        this.socket.emit("clientmsg", this.state.messages.current_message)
-        this.state.messages.current_message = ""
+    sendChat = e => {
+        e.preventDefault()
+        this.sendMessage(e.target.getAttribute("data-key"), this.state.io[e.target.getAttribute("data-key")].current_message)
+        //this.state.io[e.target.getAttribute("data-key")].messages.push({msg:"Message Sent.",className:"gameactivity"})
+        this.state.io[e.target.getAttribute("data-key")].current_message = ""
         this.setState(this.state)
     }
-
-    messagePlayers = () => {
-        this.socket.emit("playerchat", this.state.user.username + ": " + this.state.messages.current_message)
-        this.state.messages.current_message = ""
+    markMessagesAsRead = e => {
+        let theKey = e.target.getAttribute("data-key")
+        console.log(this.state.io[e.target.getAttribute("data-key")].messages)
+        Object.keys(this.state.io[theKey].messages).map((data, key) => {
+            this.state.io[theKey].messages[key].status = "read"
+        })
         this.setState(this.state)
     }
-
     handleIntroFormSubmit = e => {
         ApiConnector("addTeam", JSON.stringify({ _id: this.state.game._id, team: { team_name: this.state.team.team_name, users: [this.state.user] } }))
             .then(res => {
@@ -266,7 +284,7 @@ class App extends Component {
                     this.state.team = res
                     this.state.team.answer_history = []
                     this.setState(this.state)
-                    this.socket.emit("clientmsg", "teamjoined")
+                    this.socket.emit("gamestatus", {gameid:this.state.game._id,action:"hostrefresh",type:"teamjoined",team_name:this.state.team.team_name})
                 }
                 else if (res.dupe) {
                     this.state.error = "Duplicate Team name."
@@ -320,11 +338,11 @@ class App extends Component {
         e.preventDefault()
 
         let answerSheet = this.state.current_answer_sheet
-        if ([5,15].indexOf(this.state.game.current_question)==-1) {
+        if ([5, 15].indexOf(this.state.game.current_question) == -1) {
             console.log("add bid")
             answerSheet.answers[0].bid = this.state.current_bid
         }
-        console.log(answerSheet,this.state.current_bid)
+        console.log(answerSheet, this.state.current_bid)
         let formData = { gameid: this.state.game._id, teamid: this.state.team._id, answer_sheet: answerSheet }
         ApiConnector("submitAnswer", JSON.stringify(formData))
             .then(res => {
@@ -338,7 +356,7 @@ class App extends Component {
                     this.setState(this.state)
                     this.updateTeam()
                     this.checkBids()
-                    this.socket.emit("clientmsg", "answerdropped")
+                    this.socket.emit("gamestatus", {gameid:this.state.game._id,action:"hostrefresh",type:"answersubmit"})
                 }
             })
     }
@@ -348,11 +366,11 @@ class App extends Component {
         }
         else {
             let tempBids = []
-            if (this.state.game.current_question==10) {
-                tempBids = [2,4,6,8,10]
+            if (this.state.game.current_question == 10) {
+                tempBids = [2, 4, 6, 8, 10]
             }
-            else if (this.state.game.current_question==20) {
-                tempBids = [2,4,6,8,10,12,14,16,18,20]
+            else if (this.state.game.current_question == 20) {
+                tempBids = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
             }
             else {
                 tempBids = this.state.game.current_question < 10 ? [1, 3, 5, 7] : [2, 4, 6, 8]
@@ -361,7 +379,7 @@ class App extends Component {
                     if (questions.indexOf(answer.q) > -1) {
                         tempBids.splice(tempBids.indexOf(answer.bid), 1)
                     }
-                })                
+                })
             }
 
             this.state.bids = tempBids
@@ -390,33 +408,36 @@ class App extends Component {
                         user=this.state.user,
                         logout=this.logout
                         )
-                    if this.state.mode=="noteam"
-                        GameSigninForm(
-                            game=this.state.game,
-                            team=this.state.team,
-                            onChange=this.handleFormChange,
-                            onSubmit=this.handleIntroFormSubmit
+                    .flex
+                        .column.three-fifth
+                            if this.state.mode=="noteam"
+                                GameSigninForm(
+                                    game=this.state.game,
+                                    team=this.state.team,
+                                    onChange=this.handleFormChange,
+                                    onSubmit=this.handleIntroFormSubmit
+                                    )
+                            if this.state.mode=="active" || this.state.mode=="waiting_room"
+                                AnswerForm(
+                                    mode=this.state.mode,
+                                    game=this.state.game,
+                                    team=this.state.team,
+                                    answer_sheet=this.state.current_answer_sheet,
+                                    bids=this.state.bids,
+                                    currentBid=this.state.current_bid,
+                                    submitAnswer=this.handleAnswerSubmit,
+                                    instructions=this.instructionStrings,
+                                    instructionMap=this.instructionMap,
+                                    changeAnswer=this.changeAnswer,
+                                    changeBid=this.changeBid
+                                )
+                        .column.two-fifth
+                            ChatBox(
+                                messages=this.state.io,
+                                markMessagesAsRead=this.markMessagesAsRead,
+                                changeChat=this.changeChat,
+                                sendChat=this.sendChat
                             )
-                    if this.state.mode=="active" || this.state.mode=="waiting_room"
-                        AnswerForm(
-                            mode=this.state.mode,
-                            game=this.state.game,
-                            team=this.state.team,
-                            answer_sheet=this.state.current_answer_sheet,
-                            bids=this.state.bids,
-                            currentBid=this.state.current_bid,
-                            submitAnswer=this.handleAnswerSubmit,
-                            instructions=this.instructionStrings,
-                            instructionMap=this.instructionMap,
-                            changeAnswer=this.changeAnswer,
-                            changeBid=this.changeBid
-                        )
-                    ChatBox(
-                        messages=this.state.messages,
-                        changeMessage=this.handleMessageChange,
-                        messageHost=this.messageHost,
-                        messagePlayers=this.messagePlayers
-                    )
             
         `
     }

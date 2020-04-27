@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 
 import LoginBar from './components/login-bar'
 import GameRow from './components/game-row'
-
+import DefaultGameState from '../common-js/default-game-state'
 
 import ApiConnector from './components/api-connector'
 
@@ -25,27 +25,7 @@ class App extends Component {
         games: [],
         user: {}
     }
-    defaultGameState = {
-        mode: "fromlobby",
-        error: "",
-        team: {
-            team_name: "",
-            answer_history: []
-        },
-        game: null,
-        current_answer_sheet: null,
-        current_bid: 1,
-        bids: [1, 3, 5, 7],
-        messages: {
-            current_message:"",
-            app: [{
-                className: "intro",
-                msg: "Welcome to the Game!"
-            }],
-            host: [],
-            player: []
-        }
-    }
+    defaultGameState = DefaultGameState("fromlobby")
     componentDidMount() {
         this.getUser()
         this.fetchGames()
