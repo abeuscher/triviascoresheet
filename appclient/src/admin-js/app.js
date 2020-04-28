@@ -243,6 +243,15 @@ class App extends Component {
                 })            
         }        
     }
+    deleteAnswer = answer => {
+        if (confirm("Are you sure? The team will need to submit a new answer")) {
+            this.state.game.answer_basket = this.state.game.answer_basket.filter(thisAnswer=>{return thisAnswer!=answer})
+            this.setState(this.state)   
+            this.saveGame() 
+            this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "answerdeleted", data: answer })   
+        }
+
+    }
     playGame = game => {
         this.state.game = game
         this.refreshGame()
@@ -330,7 +339,23 @@ class App extends Component {
         this.setState(this.state)
     }
     tickAnswer = (e, basket_idx, answer_idx) => {
+        let calculatedScore = 0;
         this.state.game.answer_basket[basket_idx].answer_sheet.answers[answer_idx].correct = e.target.checked
+        if (this.state.game.answer_basket[basket_idx].answer_sheet.q%10==0) {
+            calculatedScore=(this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].correct ? this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].bid : -1 * (this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].bid/2))
+        }
+        else {
+            this.state.game.answer_basket[basket_idx].answer_sheet.answers.forEach(answer=>{
+                calculatedScore += answer.correct ? answer.bid : 0
+            })             
+        }
+
+        this.state.game.answer_basket[basket_idx].answer_sheet.score=calculatedScore
+        this.setState(this.state)
+    }
+    changeScore = e => {
+        e.preventDefault()
+        this.state.game.answer_basket[e.target.getAttribute("data-basket-idx")].answer_sheet.score=e.target.value
         this.setState(this.state)
     }
     scoreAnswer = answer_idx => {
@@ -339,17 +364,22 @@ class App extends Component {
             if (row.team._id == thisTeam._id) {
                 let thisSheet = this.state.game.answer_basket[answer_idx].answer_sheet
                 thisSheet.status="scored"
-
-                // Handle bonus questions
+                let calculatedScore = 0
                 if (thisSheet.q%10==0) {
-                    console.log(thisSheet,thisSheet.answers[0].correct ? thisSheet.answers[0].bid : -1 * (thisSheet.answers[0].bid/2))
-                    thisSheet.score=(thisSheet.answers[0].correct ? thisSheet.answers[0].bid : -1 * (thisSheet.answers[0].bid/2))
+                    calculatedScore=(thisSheet.answers[0].correct ? thisSheet.answers[0].bid : -1 * (thisSheet.answers[0].bid/2))
                 }
                 else {
-                    thisSheet.score = 0;
                     thisSheet.answers.forEach(answer=>{
-                        thisSheet.score += answer.correct ? answer.bid : 0
+                        calculatedScore += answer.correct ? answer.bid : 0
                     })
+                }                  
+
+                if (thisSheet.score!=calculatedScore && thisSheet.score!=0) {
+                    thisSheet.status="override"
+                }
+                else {
+                    thisSheet.score=calculatedScore
+                    thisSheet.status="scored"
                 }
                 row.scored_sheets.push(thisSheet)
                 this.state.game.answer_basket.splice(answer_idx, 1)
@@ -550,7 +580,10 @@ class App extends Component {
                             answers=this.state.game.answer_basket,
                             scores=this.state.game.scoresheet,
                             tickAnswer=this.tickAnswer,
-                            scoreAnswer=this.scoreAnswer
+                            scoreAnswer=this.scoreAnswer,
+                            deleteAnswer=this.deleteAnswer,
+                            changeBid=this.changeBid,
+                            changeScore=this.changeScore
                         )
                         Scoresheet(
                             game=this.state.game,
@@ -559,7 +592,6 @@ class App extends Component {
                         )
                         ChatBox(
                             messages=this.state.io,
-                            markMessagesAsRead=this.markMessagesAsRead,
                             changeChat=this.changeChat,
                             sendChat=this.sendChat,
                             chatkeyDown=this.chatkeyDown

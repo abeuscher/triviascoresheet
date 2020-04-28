@@ -87,6 +87,10 @@
             &.true {
                 color: green;
             }
+            &.override {
+                color:$orange;
+                font-weight:bold;
+            }
         }
     }
 }

@@ -151,6 +151,15 @@ class App extends Component {
                 this.logout()
             }
         }
+        if (msg.action == "answerdeleted") {
+            if (this.state.team._id==msg.data.team._id) {
+                console.log("found match")
+                this.state.team.answer_history = this.state.team.answer_history.filter(answer=>{return answer.q!=msg.data.answer_sheet.q})
+            }
+            this.setState(this.state)
+            this.checkBids()
+            this.newAnswerSheet()
+        }
 
     }
     showMessage = (className, msg) => {

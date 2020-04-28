@@ -43,12 +43,13 @@ export default class Scoresheet extends Component {
                         - let c = idx + 1
                         if this.getScore(c,row.scored_sheets)
                             - let item = this.getScore(c,row.scored_sheets)
+                            - let cellVal = item.status=="override" ? item.score : [5,10,15,20].indexOf(c)>-1 ? item.score : item.answers[0].bid
                             AnswerBox(
                                 key="answer-box-normal-"+row_idx+"-"+c,
                                 sheet=JSON.stringify(item),
                                 onClick=this.props.sendToBasket,
-                                labelClass=[5,15].indexOf(c)>-1 ? "true" : item.answers[0].correct ? "true" : "false",
-                                cellValue=[5,10,15,20].indexOf(c)>-1 ? item.score : item.answers[0].bid
+                                labelClass=item.status=="override" ? "override" : [5,15].indexOf(c)>-1 ? "true" : item.answers[0].correct ? "true" : "false",
+                                cellValue=cellVal
                                 )
                             - total = total + item.score           
                         else

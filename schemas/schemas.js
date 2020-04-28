@@ -151,6 +151,10 @@ function AppSchemas() {
                         type: String,
                         default: "unsubmitted"
                     },
+                    score: {
+                        type:Number,
+                        default:0
+                    },
                     answers: [{
                         content: {
                             type: String

@@ -1,24 +1,31 @@
 .answer-basket {
-    .header p {
-        font-weight: bold;
-        border: 1px solid $black;
+    p.team {
+        font-family:$header-font;
+        font-size:2.4em;
+        margin:0;
     }
-    .header p,
-    .column p {
-        height: 100%;
-        margin: 0;
-        line-height: 1.2;
-        text-indent: 0.25em;
+    .three-quarter p {
+        text-indent:1em;
+        &.answer {
+            text-indent:.5em;
+        }
     }
 }
 .answer-carousel {
     display: flex;
     overflow:hidden; 
     .answer-sheet {
-        min-width:90%;
-        margin:0 5% 1em;;
+        flex-basis:90%;
+        margin:0 5% 1em;
         border:1px solid $black;
         padding:0;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        @include bp(m) {
+            flex-basis:40%;
+            margin:0 5% 1em;
+        }
     }
     .question {
         font-weight:bold;
@@ -27,29 +34,63 @@
         text-align:center;
     }
     .answer-row {
-        border-bottom:1px solid $blue;
         padding:.5em 0;
         margin:0 0 .5em;
         p {
             margin:0;
             line-height:1.5;
+            &.answer {
+                font-weight:bold;
+                font-size:2em;
+            }
         }
-        p,input {
-            padding:0 .5em;
+        input[type="checkbox"] {
+            -webkit-appearance:none;
+            width:30px;
+            height:30px;
+            background:$white;
+            border-radius:5px;
+            border:2px solid $black;
+            &:checked {
+                background:green;
+                &:after {
+                    content:'✔';
+                    color:$white;
+                    padding:.45em;
+                }
+            }
         }
     }
     .button {
-        margin:2em 25% 1em;
-        width:50%;
+        display:inline-block;
+        flex-basis:50%;
+        margin-bottom:1em;
+    }
+    .column.bid {
+        text-align:center;
+        font-weight:bold;
+        display:flex;
+        flex-direction: column;
+        padding:0 25%;
+        label {
+            text-align:left;
+            display:inline-block;
+        }
+        input {
+            margin-bottom:1em;
+        }
+        .bid {
+            font-size:2em;
+        }
     }
     .answer-header {
         font-style:italic;
         background:black;
         color:$white;
         padding:.5em 0;
-        .label {
-            padding:0 .5em;
-        }
+    }
+    .quarter {
+        text-align:center;
     }
 }
 
