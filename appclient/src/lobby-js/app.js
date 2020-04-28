@@ -7,11 +7,6 @@ import DefaultGameState from '../common-js/default-game-state'
 import BgFader from './components/bg-fader'
 import ApiConnector from './components/api-connector'
 
-/*
-
-    
-
-*/
 
 class App extends Component {
 
@@ -107,7 +102,6 @@ class App extends Component {
                 .lobby
                     #bg.bg
                     .content
-                        h1 Welcome to the lobby
                         h2 Current Games:
                         GameRow(
                             header=true

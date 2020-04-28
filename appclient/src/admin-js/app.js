@@ -18,23 +18,8 @@ import WaitingRoom from './components/waiting-room'
 import ChatBox from './components/chat-box'
 
 import Env from '../env'
-/*
 
-    App flow:
-     - User enters team name
-     - Game present twenty answers in a row.
-     - App should check for current question number and not allow new submissions until it's time.
-     - It would be nice to have a server triggered client side timer
-     - Also should feature: Game Zoom Link, have space for other materials like PDFS or whatever.
 
-    Next Steps:
-      - Fix Client Bidding to be fool proof
-      - Add checks for dupe answer sheets
-      - Look into enabling basic chat
-      - Look for deploy solutions
-        
-
-*/
 class App extends Component {
 
     constructor(props) {

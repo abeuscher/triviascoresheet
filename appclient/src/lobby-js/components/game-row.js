@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ConvertDate from '../../common-js/convert-date'
 
 export default class GameRow extends Component {
     constructor(props) {
@@ -23,7 +24,7 @@ export default class GameRow extends Component {
                     .column.fifth
                         p.status=this.props.game.game_status
                     .column.fifth
-                        p.time=this.props.game.start_time
+                        p.time=ConvertDate(this.props.game.start_time)
                     .column.fifth
                         a.button(href="#",onClick=this.props.joinGame,data-id=this.props.game._id) Join Game
         `

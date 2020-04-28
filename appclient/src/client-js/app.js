@@ -12,13 +12,6 @@ import ApiConnector from './components/api-connector'
 import io from 'socket.io-client'
 
 import Env from '../env'
-/*
-
-    TODO:
-     - Make sure game description and nav are present.
-     - Make it so that a dupe team name triggers a join or watch cue
-
-*/
 
 class App extends Component {
 
@@ -100,12 +93,8 @@ class App extends Component {
             this.setState(this.state)
             console.log("Socket connected")
         });
-
-
-
     }
     sendMessage = (dest, msg) => {
-        console.log("Send message", dest, msg)
         this.socket.emit(dest, {
             gameid: this.state.game._id,
             teamid: this.state.team._id,
@@ -116,7 +105,6 @@ class App extends Component {
         })
     }
     getMessage = (dest, data) => {
-        console.log(dest, data)
         this.state.io[dest].messages.push(data)
         this.setState(this.state)
     }
@@ -127,7 +115,6 @@ class App extends Component {
         this.setState(this.state)
     }
     handleGameControl = msg => {
-        console.log("gc:",msg)
         if (msg.action == "refresh") {
             this.refreshGame()
         }
@@ -157,8 +144,10 @@ class App extends Component {
                 this.state.team.answer_history = this.state.team.answer_history.filter(answer=>{return answer.q!=msg.data.answer_sheet.q})
             }
             this.setState(this.state)
+            this.updateTeam()
             this.checkBids()
             this.newAnswerSheet()
+            this.showMessage("error","Your answer to question #"+msg.data.answer_sheet.q + " was deleted for some reason.")
         }
 
     }
@@ -377,14 +366,11 @@ class App extends Component {
 
         let answerSheet = this.state.current_answer_sheet
         if ([5, 15].indexOf(this.state.game.current_question) == -1) {
-            console.log("add bid")
             answerSheet.answers[0].bid = this.state.current_bid
         }
-        console.log(answerSheet, this.state.current_bid)
         let formData = { gameid: this.state.game._id, teamid: this.state.team._id, answer_sheet: answerSheet }
         ApiConnector("submitAnswer", JSON.stringify(formData))
             .then(res => {
-                this.state.tea
                 if (res.error) {
                     console.log(res.error)
                 }

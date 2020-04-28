@@ -1,19 +1,17 @@
+const env = require("../env")()
+
 module.exports = server => {
     const io = require('socket.io')(server, {
         credentials: true,
-        origin: 'http://64.225.118.246',
+        origin: env.domain,
         cookie: false
     });
     let host = null;
-    let runningGames = [{
-        host:null,
-        game:null
-    }]
     io.on('connection', (socket) => {
 
         //Client Joins
         socket.on("clientjoin", (data)=>{
-            console.log("Client joined",data)
+            console.log("Player joined",data)
             // Join channels for player, team, and host.
             socket.join(data.userid)
             socket.join(data.gameid)
@@ -35,6 +33,8 @@ module.exports = server => {
 
         //Host joins
         socket.on("hostjoin", (data)=>{
+            console.log("Host joined",data)
+            socket.join(data.userid)
             socket.join(data.gameid)
 
             socket.on("gamechat",data=>{

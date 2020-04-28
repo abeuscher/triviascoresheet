@@ -16,6 +16,7 @@ const Signup = require("./api/signup")
 const Update = require("./api/update")
 const UpdateGame = require("./api/update-game")
 const io = require("./api/io")
+const env = require("./env")()
 
 
 const CONNECTION_URL = "mongodb://mongodb/local";
@@ -28,7 +29,7 @@ app.use(BodyParser.urlencoded({ extended: true }));
 
 let corsOptions = {
     credentials: true,
-    origin: 'http://64.225.118.246',
+    origin: env.domain,
     optionsSuccessStatus: 200
 }
 
