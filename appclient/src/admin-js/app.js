@@ -388,7 +388,7 @@ class App extends Component {
         this.setState(this.state)
         this.saveGame()
     }
-    sendToBasket = (e) => {
+    sendToBasket = e => {
         e.preventDefault()
 
         let answerSheet = null
@@ -427,7 +427,6 @@ class App extends Component {
             })
     }
     changeQuestion = newQ => {
-        console.log("Go to q " + newQ, this.state)
         this.state.game.current_question = newQ
         this.setState(this.state)
         ApiConnector("updateGame", JSON.stringify(this.state.game))
@@ -438,7 +437,6 @@ class App extends Component {
                 }
                 
             })
-
     }
     generateCode = () => {
 
@@ -497,14 +495,6 @@ class App extends Component {
         }
         
         this.sendMessage(sendTarget,sendValue)
-        this.setState(this.state)
-    }
-    markMessagesAsRead = e => {
-        let theKey = e.target.getAttribute("data-key")
-        console.log(this.state.io[e.target.getAttribute("data-key")].messages)
-        Object.keys(this.state.io[theKey].messages).map((data,key)=>{
-            this.state.io[theKey].messages[key].status="read"
-        })
         this.setState(this.state)
     }
     changeUserPrivileges = e => {

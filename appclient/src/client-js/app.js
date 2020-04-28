@@ -123,7 +123,7 @@ class App extends Component {
 
     handleDroppedConnection = () => {
         console.log("Connection to host lost. Reconnecting...")
-        this.socket = io('http://teamtrivia.localapi:5000')
+        this.socket = io(Env().api)
         this.setState(this.state)
     }
     handleGameControl = msg => {
@@ -188,6 +188,7 @@ class App extends Component {
     componentDidUpdate() {
         if (!this.state.joined_game_chat) {
             this.makeSocketConnection()
+            this.refreshGame()
         }
         this.setLocalStorage()
     }

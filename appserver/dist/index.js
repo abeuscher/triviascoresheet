@@ -28,7 +28,7 @@ app.use(BodyParser.urlencoded({ extended: true }));
 
 let corsOptions = {
     credentials: true,
-    origin: 'http://teamtrivia.local',
+    origin: 'http://64.225.118.246',
     optionsSuccessStatus: 200
 }
 

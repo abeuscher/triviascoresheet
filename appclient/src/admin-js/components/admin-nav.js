@@ -31,7 +31,7 @@ export default class AdminNav extends Component {
                             a.button.previous-question(key="scoresheet-btn-prev-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question-1)}) Previous Question
                         if this.props.game.current_question==0
                             a.button.next-question(key="scoresheet-btn-start",href="#",onClick=this.props.beginGame) Begin Game
-                        else if this.props.game.current_question<20
+                        else if this.props.game.current_question<this.props.game.num_questions
                             a.button.next-question(key="scoresheet-btn-next-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question+1)}) Next Question                        
 
     `

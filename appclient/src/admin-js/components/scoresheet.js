@@ -5,22 +5,10 @@ export default class Scoresheet extends Component {
     constructor(props) {
         super(props);
     }
-    scoreUpdateMap = [5,10,15,19,20]
-    checkForUpdate = q => {
-        return this.scoreUpdateMap.indexOf(q)>-1
-    }
-    getScore = (question,answers) => {
-        let output = false;
-        answers.forEach(answer => {
-            if (answer.q==question) {
-                output = answer;
-            }
-        })
-        return output;
-    }
     render() {
+        const scoreUpdateMap = [5,10,15,20,this.props.game.num_questions-1]
+        const theCount = Array.apply(null, Array(this.props.game.num_questions)), total=0
         return pug`
-        - let theCount = Array.apply(null, Array(20)), total=0
         .scoresheet
             .padded-column.section-title
                 h2 Scoresheet        
@@ -31,7 +19,7 @@ export default class Scoresheet extends Component {
                     - let c = idx + 1
                     .answer-box(key="scoresheet-header-"+c,className=c==this.props.game.current_question?"current":"")
                         p(key="scoresheet-header-p-"+c)=c
-                    if this.checkForUpdate(c)
+                    if scoreUpdateMap.indexOf(c)>-1
                         .answer-box.update(key="scoresheet-header-update-"+c)
                             p(key="scoresheet-header-update-p-"+c) U
             for row,row_idx in this.props.game.scoresheet
@@ -41,24 +29,21 @@ export default class Scoresheet extends Component {
                         h2(key="scoresheet-team-label-"+row_idx)=row.team.team_name
                     each i,idx in theCount
                         - let c = idx + 1
-                        if this.getScore(c,row.scored_sheets)
-                            - let item = this.getScore(c,row.scored_sheets)
-                            - let cellVal = item.status=="override" ? item.score : [5,10,15,20].indexOf(c)>-1 ? item.score : item.answers[0].bid
-                            AnswerBox(
-                                key="answer-box-normal-"+row_idx+"-"+c,
-                                sheet=JSON.stringify(item),
-                                onClick=this.props.sendToBasket,
-                                labelClass=item.status=="override" ? "override" : [5,15].indexOf(c)>-1 ? "true" : item.answers[0].correct ? "true" : "false",
-                                cellValue=cellVal
-                                )
-                            - total = total + item.score           
-                        else
-                            AnswerBox(
-                                key="answer-box-blank-"+row_idx+"-"+c,
-                                cellValue=" ",
-                                extraClass="blank"
-                                )                
-                        if this.checkForUpdate(c)
+                        - let checkForAnswer = row.scored_sheets.filter(a => { return a.q==c })
+                        - let item = false
+                        if checkForAnswer.length>0
+                            - item = checkForAnswer[0]
+                        - let cellVal = item ? item.status=="override" ? item.score : [5,10,15,20].indexOf(c)>-1 ? item.score : item.answers[0].bid : " "
+                        AnswerBox(
+                            key="answer-"+row_idx+"-"+c,
+                            sheet=item ? JSON.stringify(item) : null,
+                            onClick=item ? this.props.sendToBasket : null,
+                            labelClass=item ? item.status=="override" ? "override" : [5,15].indexOf(c)>-1 ? "true" : item.answers[0].correct ? "true" : "false" : "",
+                            cellValue=cellVal,
+                            extraClass=item ? "" : "blank"
+                            )
+                            - total = item ? total + item.score : total                          
+                        if scoreUpdateMap.indexOf(c)>-1
                             - let cellVal = c<=this.props.game.current_question ? total : "U"
                             AnswerBox(
                                 key="answer-box-update-"+row_idx+"-"+c,

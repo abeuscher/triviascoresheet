@@ -1,22 +1,5 @@
 const mongoose = require('mongoose');
 
-/*
-    Adding a field to the schema will add it throughout the app. A restart of the client and server is required.
-    IT may be that I can remove this weird outer dependency on Mongoose, but after several tries to fix it while entering schema -> server I have given up for now.
-
-    Dependency:
-        New data types MUST have:
-            title: {
-                type: String,
-                dafault: "State Your Name"
-            },
-            created: {
-                type: Date,
-                default: Date.now
-            }
-
-*/
-
 function AppSchemas() {
     return {
         "user": {

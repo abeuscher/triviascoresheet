@@ -22,7 +22,7 @@ export default class GameForm extends Component {
                 label(for="game_title") Title for Game
                 input(type="text",name="game_title",value=this.props.game.game_title,onChange=this.props.onFieldChange)
                 label(for="num_questions") Number of Questions
-                select(name="num_questions", onChange=this.props.onSelectChange)
+                select(name="num_questions", onChange=this.props.onSelectChange,value=this.props.game.num_questions)
                     option(value="10") 10
                     option(value="20") 20
                 DateInput(id="start_time",label="Start Time",onChange=this.props.onTimeChange,value=this.props.game.start_time)

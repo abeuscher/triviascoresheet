@@ -1,7 +1,7 @@
 module.exports = server => {
     const io = require('socket.io')(server, {
         credentials: true,
-        origin: 'http://teamtrivia.local',
+        origin: 'http://64.225.118.246',
         cookie: false
     });
     let host = null;

@@ -5,9 +5,9 @@
         margin:0;
     }
     .three-quarter p {
-        text-indent:1em;
+        padding:0 1em;
         &.answer {
-            text-indent:.5em;
+            padding:0 .5em;
         }
     }
 }
