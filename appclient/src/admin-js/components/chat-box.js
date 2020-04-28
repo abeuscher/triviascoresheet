@@ -15,7 +15,8 @@ export default class ChatBox extends Component {
                             io=this.props.messages[i],
                             markMessagesAsRead=this.props.markMessagesAsRead,
                             changeChat=this.props.changeChat,
-                            sendChat=this.props.sendChat
+                            sendChat=this.props.sendChat,
+                            chatkeyDown=this.props.chatkeyDown
                             )
                               
         `
@@ -45,10 +46,9 @@ class ChatRow extends Component {
                 if typeof this.props.io.current_message!="undefined"
                     .column.chat
                         .inner
-                            textarea(value=this.props.io.current_message,onChange=this.props.changeChat,data-key=this.props.index)
+                            textarea(value=this.props.io.current_message,onChange=this.props.changeChat,onKeyDown=this.props.chatkeyDown,data-key=this.props.index)
                             .buttons
                                 button(onClick=this.props.sendChat,data-key=this.props.index) Send Message
-                                button clr 
         `
     }  
 }

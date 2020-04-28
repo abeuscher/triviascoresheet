@@ -1,31 +1,38 @@
 import React, { Component } from 'react'
+import ConvertDate from '../../common-js/convert-date'
 
 export default class AnswerForm extends Component {
     constructor(props) {
         super(props); 
     }
-    convertDate = i => {
-        const d = new Date(i)
-        const dtf = new Intl.DateTimeFormat('en', { weekday:'long',year: 'numeric', month: 'long', day: 'numeric', hour:'numeric',minute:'2-digit',second:'2-digit' }) 
-        const [{ value: we },,{ value: mo },,{ value: da },,{ value: ye },,{ value: ho },,{ value: mi },,{ value: se }] = dtf.formatToParts(d) 
-        return `${we} ${mo} ${da}, ${ye} ${ho}:${mi}:${se}`;
-    }
     render() {
         return pug`
         - let game = this.props.game
-        .answer-form.section-title
+        .answer-form.answer-header
             h2=game.game_title
-        .answer-form.description(dangerouslySetInnerHTML={__html:this.props.game.game_description})
+            h3="Playing as: "
+                span.team.white=this.props.team.team_name
+            if game.current_question==0
+                p="Starts: " + ConvertDate(game.start_time)
+            else if game.current_question==20
+                h3
+                    span.white Game Completed.
+            else
+                h3="Current Question: "
+                    span.white=game.current_question
+        .answer-description
+            input(type="checkbox",name="info-toggle",id="info-toggle")
+            label(for="info-toggle") Game Info:
+            .content(dangerouslySetInnerHTML={__html:this.props.game.game_description})
         .answer-form
-            h3="Your Team: "+this.props.team.team_name
             if this.props.mode=="waiting_room"
-                h4 You are in the waiting room. Please wait for the host to add you to the game.
+                h3 You are in the waiting room. Please wait for the host to add you to the game.
             else if game.current_question==0
-                h4="Game Start Time: " + this.convertDate(game.start_time)
                 p=this.props.instructions[this.props.instructionMap[game.current_question]]
             else
-                h2="Current Question: " + game.current_question
-                if !this.props.answer_sheet
+                if !this.props.answer_sheet && this.props.game.current_question==20
+                    p Game is over. Thanks for playing!
+                else if !this.props.answer_sheet
                     p Current Question has been answered. Hang tight for the next question.
                 else
                     p=this.props.instructions[this.props.instructionMap[game.current_question]]

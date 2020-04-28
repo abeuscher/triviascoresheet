@@ -1,0 +1,20 @@
+.manager-container {
+    padding:0 $gutter-width $gutter-width;
+    .manager-row {
+        padding:1em;
+        &:nth-child(odd) {
+           background:lighten($blue,40%);
+        }
+        &:nth-child(even) {
+            background:lighten($blue,50%);
+        }
+        .column {
+            display:flex;
+            align-items:center;
+        }
+        .game-title {
+            font-family:$header-font;
+            font-size:2em;
+        }
+    }
+}

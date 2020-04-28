@@ -1,5 +1,7 @@
 .admin-controls {
     padding:.5em;
+    background:darken($blue,20%);
+    border-bottom:1px solid lighten($blue,30%);
     .button {
         margin-right:1em;
     }

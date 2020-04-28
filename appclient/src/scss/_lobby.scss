@@ -1,17 +1,81 @@
 .lobby {
-    background:$white;
+    position:relative;
+    .bg {
+        position:absolute;
+        top:0;
+        bottom:0;
+        right:0;
+        left:0;
+        z-index:0;
+        overflow:hidden;
+        &.fade-in {
+            animation:8s fadeIn ease-in;
+        }
+        &.fade-out {
+            animation:8s fadeOut ease-out;
+        }
+        img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            opacity: 0;
+            z-index: 0;
+            width:100%;
+            &.incoming_slide {
+              opacity: 1;
+              z-index: 2;
+              transition:opacity 12s ease-in;
+            }
+            &.old_slide {
+              opacity: 1;
+              z-index: 1;
+            }
+          }
+    }
+    @keyframes fadeIn {
+        100% {
+            opacity:.6;
+        }
+    }
+    @keyframes fadeOut {
+        100% {
+            opacity:0;
+        }
+    }
+    .content {
+        position:relative;
+    }
+    color:$white;
     padding:$gutter-width/2 $gutter-width;
     .game-row {
         padding:$gutter-width/4;
         align-items:center;
+        color:$white;
+
+        p.title {
+            font-family:$header-font;
+            font-size:2em;
+        }
+        &.header {
+            padding:.5em $gutter-width/4;
+            p, p.title {
+                font-size:1.5em;
+                margin:0;
+                text-transform:uppercase;
+                font-weight:bold;
+                color:$orange;
+                font-family:$header-font;
+            }
+        }        
         .button {
             display:block;
         }
         &:nth-child(odd) {
-            background:lighten($blue,60%)
+            background:rgba(0,0,0,.7)
         }
         &:nth-child(even) {
-            background:lighten($blue,70%)
+            background:rgba(0,0,0,.8)
         }
     }
 }

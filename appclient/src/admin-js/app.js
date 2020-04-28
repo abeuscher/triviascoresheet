@@ -16,6 +16,8 @@ import Scoresheet from './components/scoresheet'
 import AnswerBasket from './components/answer-basket'
 import WaitingRoom from './components/waiting-room'
 import ChatBox from './components/chat-box'
+
+import Env from '../env'
 /*
 
     App flow:
@@ -38,7 +40,6 @@ class App extends Component {
     constructor(props) {
         super(props);
         let saveState = this.getLocalStorage();
-        console.log("Saved State:",saveState)
         this.state = saveState ? saveState : this.defaultState;
         this.makeSocketConnection()
 
@@ -70,7 +71,7 @@ class App extends Component {
             this.launchManager();
         }
     }
-    socket = io('http://teamtrivia.localapi:5000')
+    socket = io(Env().api)
     makeSocketConnection = () => {
         this.socket.on('connect', () => {
             this.socket.emit("identify host", "Hey guys!")
@@ -94,7 +95,6 @@ class App extends Component {
         });
     }
     handleGameControl = msg => {
-        console.log("Game Control:",msg)
         if (msg.action=="hostrefresh") {
             this.refreshGame()
         }
@@ -239,6 +239,7 @@ class App extends Component {
                     this.state.game.scoresheet = this.state.game.scoresheet.filter(item=>{return item.team._id!=team._id})
                     this.setState(this.state)
                     console.log(res)
+                    this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "teamdeleted", data: team })
                 })            
         }        
     }
@@ -287,7 +288,6 @@ class App extends Component {
             team: team,
             scored_sheets: []
         })
-        console.log("Emit game data")
         this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "teamadded", data: team })
         this.setState(this.state)
         this.saveGame()
@@ -296,7 +296,7 @@ class App extends Component {
         if (confirm("Are you sure you want to remove this team from the game? All of their answers up to this point will be lost. Forever. Seriously.")) {
             this.state.game.scoresheet = this.state.game.scoresheet.filter(t => { return t.team._id != team._id })
             this.state.game.waiting_room.push(team)  
-            this.socket.emit("gamestatus", { label: "teamremoved", data: team })
+            this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "teamremoved", data: team })
             this.setState(this.state)
             console.log("Team moved",this.state, team)
             this.saveGame()            
@@ -427,12 +427,10 @@ class App extends Component {
         return hash(seed)
     }
     getMessage = (dest, data) => {
-        console.log(dest, data)
         this.state.io[dest].messages.push(data)
         this.setState(this.state)
     }
     sendMessage = (dest, msg) => {
-        console.log("Send message",dest,msg)
         this.socket.emit(dest, {
             gameid: this.state.game._id,
             userid: this.state.user._id,
@@ -447,11 +445,28 @@ class App extends Component {
         this.state.io[e.target.getAttribute("data-key")].current_message=e.target.value
         this.setState(this.state)
     }
+    chatkeyDown = e => {
+        if (e.key=="Enter") {
+            e.preventDefault()
+            this.sendChat()
+        }
+    }
     sendChat = e => {
-        e.preventDefault()
-        this.sendMessage(e.target.getAttribute("data-key"),this.state.io[e.target.getAttribute("data-key")].current_message)
-        //this.state.io[e.target.getAttribute("data-key")].messages.push({msg:"Message Sent.",className:"gameactivity"})
-        this.state.io[e.target.getAttribute("data-key")].current_message=""
+        let sendValue = null
+        let sendTarget = null
+        if (e) {
+            e.preventDefault()
+            sendValue = this.state.io[e.target.getAttribute("data-key")].current_message
+            sendTarget = e.target.getAttribute("data-key")
+            this.state.io[e.target.getAttribute("data-key")].current_message = ""
+        }
+        else {
+            sendValue = this.state.io.gamechat.current_message 
+            sendTarget = "gamechat"
+            this.state.io.gamechat.current_message = ""
+        }
+        
+        this.sendMessage(sendTarget,sendValue)
         this.setState(this.state)
     }
     markMessagesAsRead = e => {
@@ -546,7 +561,8 @@ class App extends Component {
                             messages=this.state.io,
                             markMessagesAsRead=this.markMessagesAsRead,
                             changeChat=this.changeChat,
-                            sendChat=this.sendChat
+                            sendChat=this.sendChat,
+                            chatkeyDown=this.chatkeyDown
                         )
         `
     }

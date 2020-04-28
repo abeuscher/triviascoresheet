@@ -10,27 +10,26 @@ export default class GameManager extends Component {
         return pug`
             .manager-container.padded-column.section-title
                 h2 Edit or Delete Games:
-            .manager-container.padded-column  
+            .manager-container
                 for game,idx in this.props.games
                     .manager-row.flex(key="m-row-"+idx)
                         .column.two-fifth
                             p.game-title=game.game_title
-                            p.start-time=game.start_time 
                         .column.fifth
                             a.button.small.edit(                                
                                 href="#",
                                 onClick = e => { e.preventDefault(); this.props.editGame(game) }
-                                ) Edit Game
+                                ) Edit Game Details
                         .column.fifth
                             a.button.small.play(
                                 key="play-"+idx,
                                 href="#",onClick = e => {e.preventDefault();this.props.playGame(game)}
-                                ) Play Game
+                                ) Run Game
                         .column.fifth
                             a.button.small.delete(
                                 key="delete"+idx,
                                 onClick = e => {e.preventDefault(); this.props.deleteGame(game) }
-                                ) Delete this record
+                                ) Delete Game
         `
     }
 }

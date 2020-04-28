@@ -11,6 +11,7 @@ import ApiConnector from './components/api-connector'
 
 import io from 'socket.io-client'
 
+import Env from '../env'
 /*
 
     TODO:
@@ -53,7 +54,9 @@ class App extends Component {
             })
     }
     logout = e => {
-        e.preventDefault();
+        if (e) {
+            e.preventDefault();
+        }
         this.state.game = {}
         this.state.team = {}
         this.setState(this.state)
@@ -61,7 +64,7 @@ class App extends Component {
         window.sessionStorage.removeItem("gamestate")
         location.href = "login.html"
     }
-    socket = io('http://teamtrivia.localapi:5000')
+    socket = io(Env().api)
     makeSocketConnection = () => {
         this.socket.on('connect', () => {
             console.log("sending", {
@@ -123,17 +126,32 @@ class App extends Component {
         this.socket = io('http://teamtrivia.localapi:5000')
         this.setState(this.state)
     }
-    handleGameControl = data => {
-        if (data.action=="refresh") {
+    handleGameControl = msg => {
+        console.log("gc:",msg)
+        if (msg.action == "refresh") {
             this.refreshGame()
         }
-        if (data.action=="teamadded") {
-            if (data._id==this.state.team._id) {
-                this.state.io.gamestatus.messages.push({className:"local",msg:"You have been added to the game"})
-                this.state.mode="active"
+        if (msg.action == "teamadded") {
+            if (msg.data._id == this.state.team._id) {
+                this.state.io.gamestatus.messages.push({ className: "local", msg: "You have been added to the game! Welcome!" })
+                this.state.mode = "active"
                 this.setState(this.state)
             }
         }
+        if (msg.action == "teamremoved") {
+            if (msg.data._id == this.state.team._id) {
+                this.state.io.gamestatus.messages.push({ className: "local", msg: "You have been removed from the game for some reason. You are now in the waiting room." })
+                this.state.mode = "waiting_room"
+                this.setState(this.state)
+            }
+        }
+        if (msg.action == "teamdeleted") {
+            if (msg.data._id == this.state.team._id) {
+                this.state.io.gamestatus.messages.push({ className: "local", msg: "Your team has been deleted. You are being logged out." })
+                this.logout()
+            }
+        }
+
     }
     showMessage = (className, msg) => {
         this.state.io.gamestatus.messages.push({ className: className, msg: msg })
@@ -142,7 +160,7 @@ class App extends Component {
     componentDidMount() {
 
         if (this.state.mode == "fromlobby") {
-            this.state.mode = "noteam" 
+            this.state.mode = "noteam"
             this.getUser()
             this.refreshGame()
             this.state.joined_game_chat = false
@@ -262,19 +280,28 @@ class App extends Component {
         this.state.io[e.target.getAttribute("data-key")].current_message = e.target.value
         this.setState(this.state)
     }
-    sendChat = e => {
-        e.preventDefault()
-        this.sendMessage(e.target.getAttribute("data-key"), this.state.io[e.target.getAttribute("data-key")].current_message)
-        //this.state.io[e.target.getAttribute("data-key")].messages.push({msg:"Message Sent.",className:"gameactivity"})
-        this.state.io[e.target.getAttribute("data-key")].current_message = ""
-        this.setState(this.state)
+    chatkeyDown = e => {
+        if (e.key=="Enter") {
+            e.preventDefault()
+            this.sendChat()
+        }
     }
-    markMessagesAsRead = e => {
-        let theKey = e.target.getAttribute("data-key")
-        console.log(this.state.io[e.target.getAttribute("data-key")].messages)
-        Object.keys(this.state.io[theKey].messages).map((data, key) => {
-            this.state.io[theKey].messages[key].status = "read"
-        })
+    sendChat = e => {
+        let sendValue = null
+        let sendTarget = null
+        if (e) {
+            e.preventDefault()
+            sendValue = this.state.io[e.target.getAttribute("data-key")].current_message
+            sendTarget = e.target.getAttribute("data-key")
+            this.state.io[e.target.getAttribute("data-key")].current_message = ""
+        }
+        else {
+            sendValue = this.state.io.gamechat.current_message 
+            sendTarget = "gamechat"
+            this.state.io.gamechat.current_message = ""
+        }
+        
+        this.sendMessage(sendTarget,sendValue)
         this.setState(this.state)
     }
     handleIntroFormSubmit = e => {
@@ -285,7 +312,7 @@ class App extends Component {
                     this.state.team = res
                     this.state.team.answer_history = []
                     this.setState(this.state)
-                    this.socket.emit("gamestatus", {gameid:this.state.game._id,action:"hostrefresh",type:"teamjoined",team_name:this.state.team.team_name})
+                    this.socket.emit("gamestatus", { gameid: this.state.game._id, action: "hostrefresh", type: "teamjoined", team_name: this.state.team.team_name })
                 }
                 else if (res.dupe) {
                     this.state.error = "Duplicate Team name."
@@ -357,36 +384,31 @@ class App extends Component {
                     this.setState(this.state)
                     this.updateTeam()
                     this.checkBids()
-                    this.socket.emit("gamestatus", {gameid:this.state.game._id,action:"hostrefresh",type:"answersubmit"})
+                    this.socket.emit("gamestatus", { gameid: this.state.game._id, action: "hostrefresh", type: "answersubmit" })
                 }
             })
     }
     checkBids = () => {
-        if ((this.state.game.current_question + 1) % 5 == 0) {
-            console.log("Bonus question")
+        let tempBids = []
+        if (this.state.game.current_question == 10) {
+            tempBids = [2, 4, 6, 8, 10]
+        }
+        else if (this.state.game.current_question == 20) {
+            tempBids = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
         }
         else {
-            let tempBids = []
-            if (this.state.game.current_question == 10) {
-                tempBids = [2, 4, 6, 8, 10]
-            }
-            else if (this.state.game.current_question == 20) {
-                tempBids = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
-            }
-            else {
-                tempBids = this.state.game.current_question < 10 ? [1, 3, 5, 7] : [2, 4, 6, 8]
-                let questions = [[1, 2, 3, 4], [6, 7, 8, 9], [11, 12, 13, 14], [16, 17, 18, 19]][parseInt(this.state.game.current_question / 5)]
-                this.state.team.answer_history.forEach(answer => {
-                    if (questions.indexOf(answer.q) > -1) {
-                        tempBids.splice(tempBids.indexOf(answer.bid), 1)
-                    }
-                })
-            }
-
-            this.state.bids = tempBids
-            this.state.current_bid = tempBids[0]
-            this.setState(this.state)
+            tempBids = this.state.game.current_question < 10 ? [1, 3, 5, 7] : [2, 4, 6, 8]
+            let questions = [[1, 2, 3, 4], [6, 7, 8, 9], [11, 12, 13, 14], [16, 17, 18, 19]][parseInt(this.state.game.current_question / 5)]
+            this.state.team.answer_history.forEach(answer => {
+                if (questions.indexOf(answer.q) > -1) {
+                    tempBids.splice(tempBids.indexOf(answer.bid), 1)
+                }
+            })
         }
+
+        this.state.bids = tempBids
+        this.state.current_bid = tempBids[0]
+        this.setState(this.state)
     }
     changeAnswer = (e, numAnswer) => {
         e.preventDefault()
@@ -432,12 +454,12 @@ class App extends Component {
                                         changeAnswer=this.changeAnswer,
                                         changeBid=this.changeBid
                                     )
-                            .column.two-fifth.chat-bucket
+                            .column.two-fifth.chat-bucket.flex
                                 ClientChat(
                                     io=this.state.io,
-                                    markMessagesAsRead=this.markMessagesAsRead,
                                     changeChat=this.changeChat,
-                                    sendChat=this.sendChat
+                                    sendChat=this.sendChat,
+                                    chatkeyDown=this.chatkeyDown
                                 )
             
         `

@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom'
 import LoginBar from './components/login-bar'
 import GameRow from './components/game-row'
 import DefaultGameState from '../common-js/default-game-state'
-
+import BgFader from './components/bg-fader'
 import ApiConnector from './components/api-connector'
 
 /*
@@ -23,12 +23,18 @@ class App extends Component {
     }
     defaultState = {
         games: [],
-        user: {}
+        user: {},
+        scene: {
+            current:null,
+            previous:null,
+            images:[]
+        }
     }
     defaultGameState = DefaultGameState("fromlobby")
     componentDidMount() {
         this.getUser()
         this.fetchGames()
+        this.initFader()
     }
     fetchGames = () => {
         ApiConnector("read", "")
@@ -41,6 +47,17 @@ class App extends Component {
                     this.setState(this.state)
                 }
             })
+    }
+    initFader = () => {
+        let images = []
+        for (let i=1;i<31;i++) {
+            images.push("/images/bg/bg"+i+".jpg")
+        }
+        var opts = {
+            "container": document.getElementById("bg"),
+            "images": images
+        }
+        var bgFader = new BgFader(opts)
     }
     saveState = () => {
         if (this.state.games.length) {
@@ -82,21 +99,27 @@ class App extends Component {
     render() {
 
         return pug`
-            #wrapper
+            .black-wrapper
                 LoginBar(
                     user=this.state.user,
                     logout=this.logout
                 )
                 .lobby
-                    h1 Welcome to the lobby
-                    h2 Current Games:
-                    for game,game_idx in this.state.games
+                    #bg.bg
+                    .content
+                        h1 Welcome to the lobby
+                        h2 Current Games:
                         GameRow(
-                            key="game-row-"+game_idx
-                            game=game,
-                            joinGame=this.joinGame,
-                            refresh=this.fetchGames
-                            )
+                            header=true
+                        )
+                        for game,game_idx in this.state.games
+                            GameRow(
+                                key="game-row-"+game_idx,
+                                header=false,
+                                game=game,
+                                joinGame=this.joinGame,
+                                refresh=this.fetchGames
+                                )
         `
     }
 }

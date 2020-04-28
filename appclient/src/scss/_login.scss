@@ -39,3 +39,14 @@ form.login-form, form.signup-form {
         text-align: center;
     }
 }
+.login-bucket {
+    .error-box {
+        padding:$gutter-width/2;
+        p {
+            text-align:center;
+            color:$orange;
+            font-size:1.5em;
+            line-height:2;
+        }
+    }
+}

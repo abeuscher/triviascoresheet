@@ -17,7 +17,7 @@ export default class GameForm extends Component {
                 if this.props.mode=="create"
                     h2 Create New Game:
                 else 
-                    h2="Edit Record id#"+this.props.game._id   
+                    h2="Editing Game: "+this.props.game.game_title   
             .game-entry-form.padded-column         
                 label(for="game_title") Title for Game
                 input(type="text",name="game_title",value=this.props.game.game_title,onChange=this.props.onFieldChange)

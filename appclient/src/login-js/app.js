@@ -27,7 +27,6 @@ class App extends Component {
             location.href="lobby.html"
         }
     }
-
     logout = () => {
         window.sessionStorage.removeItem("userstate")
         window.sessionStorage.removeItem("userstate")
@@ -54,8 +53,8 @@ class App extends Component {
             this.setState(this.state)
         }
         this.state.error=msg
-        this.setState(this.state)   
-        setTimeout(flashError,15000)     
+        this.setState(this.state) 
+        setTimeout(flashError,5000)     
     }
     showMessage = msg => {
         const flashMessage = () => { 
@@ -68,7 +67,7 @@ class App extends Component {
     }
     login = e => {
         e.preventDefault()
-        if (this.checkForm) {
+        if (this.checkForm()) {
             ApiConnector("login",JSON.stringify(this.state.creds))
                 .then(res=>{
                     console.log(res)
@@ -81,10 +80,14 @@ class App extends Component {
                     }
 
                 })
+        }
+        else {
+            this.showError("Please enter a username and password to continue")
         }     
     }
     signup = e => {
-        if (this.checkForm) {
+        e.preventDefault()
+        if (this.checkForm()) {
             ApiConnector("signup",JSON.stringify(this.state.creds))
                 .then(res=>{
                     if (res._id) {
@@ -92,44 +95,61 @@ class App extends Component {
                         location.href="lobby.html"     
                     }
                     else {
-                        console.log(res)
+                        this.showError("That appears to be a duplicate username. Please change it and retry")
                     }
                 })
         }  
+        else {
+            this.showError("Please enter a username and password to continue")
+        }
     }
     resetpw = e => {
-        if (this.state.creds.pasw!=this.state.creds.pasw2 || this.state.creds.pasw=="" || this.state.creds.pasw2=="") {
-            this.showError("Please make sure you entered two matching passwords. Blanks are not accepted. Because blank is not a password. It is the absence of a password.")
+        e.preventDefault()
+        if (this.state.creds.username==""||this.state.creds.pasw!=this.state.creds.pasw2 || this.state.creds.pasw=="" || this.state.creds.pasw2=="") {
+            this.showError("Please make sure you entered two matching passwords and a username. Blanks are not accepted. Because blank is not a password. It is the absence of a password.")
             return false;
         }  
+        else {
+            ApiConnector("changepw",JSON.stringify(this.state.creds))
+                .then(res=>{
+                    if (res.error) {
+                        this.showError("There was a problem.")
+                    }
+                    else {
+                        window.sessionStorage.setItem("userstate", JSON.stringify(res));
+                        location.href="lobby.html"    
+                    }
+                })
+        }
     }
     render() {
 
         return pug`
-            
-            .login-bucket
-                if this.state.view=="signup"
-                    SignupForm(
-                        creds=this.state.creds,
-                        signup=this.signup,
-                        changeView=this.changeView,
-                        onChange=this.changeField
-                        )
-                else if this.state.view=="changepw"
-                    RetrievePasswordForm(                        
-                        creds=this.state.creds,
-                        changeView=this.changeView,
-                        onChange=this.changeField
-                        )
-                else
-                    LoginForm(
-                        creds=this.state.creds,
-                        login=this.login,
-                        changeView=this.changeView,
-                        onChange=this.changeField
-                        )                        
-                .error-box
-                    p=this.state.error
+            #wrapper    
+                .login-bucket
+                    if this.state.view=="signup"
+                        SignupForm(
+                            creds=this.state.creds,
+                            signup=this.signup,
+                            changeView=this.changeView,
+                            onChange=this.changeField
+                            )
+                    else if this.state.view=="changepw"
+                        RetrievePasswordForm(                        
+                            creds=this.state.creds,
+                            changeView=this.changeView,
+                            onChange=this.changeField,
+                            resetpw=this.resetpw
+                            )
+                    else
+                        LoginForm(
+                            creds=this.state.creds,
+                            login=this.login,
+                            changeView=this.changeView,
+                            onChange=this.changeField
+                            )                        
+                    .error-box
+                        p=this.state.error
         `
     }
 }

@@ -1,47 +1,117 @@
-.answer-form {
-    &.description {
-        background:lighten($blue,70%)
-    }
-    &.section-title {
-        background:$black;
-        text-align:center;
-        h2,p {
-            color:$white;
+.answer-header {
+    background: darken($blue, 10%);
+    color: $white;
+    text-align: center;
+    h3 {
+        color: $orange;
+        .white {
+            color: $white;
         }
     }
-    padding:$gutter-width/2 $gutter-width;
-    label, input, select {
-        display:block;
+    p {
+        text-transform: uppercase;
+        font-size: 0.8em;
     }
+}
+
+.answer-description {
+    background: $off-white;
+    padding: 0;
     label {
-        width:50%;
-        margin:0 25%;
+        @include nice-transition();
+        background: darken($blue, 10%);
+        color: $white;
+        text-align: center;
+        display: block;
+        flex-basis: 100%;
+        line-height: 2;
+        cursor: pointer;
+
+        &:after {
+            @include nice-transition();
+            content: "";
+            width: 0;
+            height: 0;
+            border: 6px solid transparent;
+            border-top-color: $white;
+            display: inline-block;
+            transform: translate(5px, -5px) rotate(-180deg);
+        }
+        &:hover {
+            color: $gray;
+        }
     }
-    input, select {
-        width:100%;  
-        border:0;
-        padding:.25em 0;
-        outline:none;    
-        font-size:1.4em;
-        line-height:2; 
-        border:1px solid $black;
+    .content {
+        @include nice-transition();
+        max-height: 0;
+        overflow: hidden;
+        background:lighten($blue,10%);
+        
+        color:$white;
     }
     input {
-        text-indent:.5em;
+        display: none;
+        &:checked {
+            ~ .content {
+                max-height: 300px;
+                padding:$gutter-width/4 $gutter-width/2;
+            }
+            ~ label {
+                color: $gray;
+                &:after {
+                    border-top-color: $gray;
+                    transform: translate(5px, 5px) rotate(0deg);                    
+                }
+            }
+        }
     }
+}
+.answer-form {
+    &.section-title {
+        background: $black;
+        text-align: center;
+        h2,
+        p {
+            color: $white;
+        }
+    }
+    padding: $gutter-width/2 $gutter-width;
+    label,
+    input,
     select {
-        font-size:2em;
+        display: block;
     }
     label {
-        text-transform:uppercase;
-        font-size:.8em;
-        input[type="text"], select {
-            margin-bottom:1em;
+        width: 50%;
+        margin: 0 25%;
+    }
+    input,
+    select {
+        width: 100%;
+        border: 0;
+        padding: 0.25em 0;
+        outline: none;
+        font-size: 1.4em;
+        line-height: 2;
+        border: 1px solid $black;
+    }
+    input {
+        text-indent: 0.5em;
+    }
+    select {
+        font-size: 2em;
+    }
+    label {
+        text-transform: uppercase;
+        font-size: 0.8em;
+        input[type="text"],
+        select {
+            margin-bottom: 1em;
         }
     }
     .button {
-        width:50%;
-        margin:0 25%;
-        padding:1em 0;
+        width: 50%;
+        margin: 0 25%;
+        padding: 1em 0;
     }
 }

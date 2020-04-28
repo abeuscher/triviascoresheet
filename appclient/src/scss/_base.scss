@@ -22,16 +22,17 @@ h5,
 h6 {
   font-family: $header-font;
 }
-#admin-app, #player-app, #login-app, #lobby-app, .page-header {
+#admin-app, #player-app, #login-app, #lobby-app, .page-header, .page-footer {
   width:95%;
   max-width:1200px;
   margin:0 auto;
 }
 #wrapper {
-  padding-bottom:$gutter-width;
   background:$off-white;
 }
-
+.black-wrapper {
+  background:$black;
+}
 .flex {
   display:flex;
   flex-wrap:wrap;
