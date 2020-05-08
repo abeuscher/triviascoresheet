@@ -5,10 +5,12 @@
   "author": "Al Beuscher <alexbeuscher@gmail.com>",
   "main": "dist/index.js",
   "scripts": {
-    "startclient": "gulp --cwd ./appclient",
+    "buildproduction":"gulp --production --cwd ./appclient",
+    "dev": "gulp --cwd ./appclient",
     "installclient":"yarn install --cwd ./appclient",
     "resetserver": "docker-compose restart",
-    "startapp": "docker-compose up -d && yarn startclient"
+    "startserver-dev": "docker-compose up -d && yarn installcient && yarn dev",
+    "startserver-prod": "docker-compose up -d && yarn installcient && yarn buildproduction"
   },
   "dependencies" : {
     "mongoose" : "5.9.2"

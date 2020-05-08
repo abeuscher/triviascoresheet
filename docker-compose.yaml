@@ -16,7 +16,7 @@ services:
       MONGO_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
   appclient:
     build: 
-      context: ./appclient
+      context: ./appclient/
     container_name: 'appclient'
     restart: 'always'
     hostname: ${SERVER_HOSTNAME}
