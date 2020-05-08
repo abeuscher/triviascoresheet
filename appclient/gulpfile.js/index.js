@@ -21,9 +21,4 @@ function defaultTask(cb) {
     }
     cb()
   }
-  let endTask = cb => {
-    cb()
-    return true
-    
-  }
-exports.default = series(defaultTask,bundleJS,processCss,buildTemplates, moveFiles, endTask);
+exports.default = series(defaultTask,bundleJS,processCss,buildTemplates, moveFiles);
