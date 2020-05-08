@@ -2,3 +2,5 @@ node_modules
 public_html
 yarn.lock
 yarn-error.log
+env.js
+src/env.js
