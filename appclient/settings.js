@@ -20,7 +20,7 @@ var templateBuildDir = buildDir;
 
 function siteSettings() {
   return {
-    siteName: "alexbeuscher.com",
+    siteName: "Team Trivia App",
     directories:[buildDir, jsBuildDir],
     jsFiles: [
       {

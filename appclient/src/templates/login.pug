@@ -5,5 +5,7 @@ block css
 
 block content
   #login-app
+  
 block script
-  script(src='js/login-bundle.js')
+  - let ext = locals.mode=='production' ? '.min.js' : '.js'
+  script(src='js/login-bundle' + ext)

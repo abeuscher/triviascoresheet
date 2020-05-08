@@ -1,18 +1,29 @@
-var settings = require("../settings.js")();
-var bundleJS = require("./bundle-js.js");
-var processCss = require("./process-css.js");
-var buildTemplates = require("./build-templates.js");
-var moveFiles = require("./move-files.js");
+const settings = require("../settings.js")();
+const bundleJS = require("./bundle-js.js");
+const processCss = require("./process-css.js");
+const buildTemplates = require("./build-templates.js");
+const moveFiles = require("./move-files.js");
 
-var checkDir = require("./check-dir.js");
+const checkDir = require("./check-dir.js");
 
-const { series, watch } = require('gulp');
+const { series } = require('gulp');
+
+const mode = require('gulp-mode')({
+  modes: ["production", "development"],
+  default: "development",
+  verbose: false
+});
+
 function defaultTask(cb) {
-    console.log("Begin processing " + settings.siteName);
+  mode.development(() => { console.log("Begin processing " + settings.siteName) })
     for (i=0;i<settings.directories.length;i++) {
-      checkDir(settings.directories[i]);
+      checkDir(settings.directories[i])
     }
-    cb();
+    cb()
   }
-  
-exports.default = series(defaultTask,bundleJS,processCss,buildTemplates, moveFiles);
+  let endTask = cb => {
+    cb()
+    return true
+    
+  }
+exports.default = series(defaultTask,bundleJS,processCss,buildTemplates, moveFiles, endTask);

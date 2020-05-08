@@ -1,28 +1,60 @@
-var settings = require("../settings.js")();
+const settings = require("../settings.js")();
+
+const mode = require('gulp-mode')({
+    modes: ["production", "development"],
+    default: "development",
+    verbose: false
+})
 
 const { src, dest, watch } = require('gulp');
 
-var findDirMatch = require("./find-dir-match.js");
+const findDirMatch = require("./find-dir-match.js");
 
 function moveFiles(cb) {
-    var watcher = watch([settings.assets[0].srcDir + "*", settings.assets[0].srcDir + "**/*"]);
-    moveFileset(settings.assets[0]);
-    for (i=1;i<settings.assets.length;i++) {
-        moveFileset(settings.assets[i]);
-        watcher.add([settings.assets[i].srcDir + "*", settings.assets[i].srcDir + "**/*"]);
+
+    let watcher = {}
+
+    mode.development(() => {
+
+        watcher = watch([settings.assets[0].srcDir + "*", settings.assets[0].srcDir + "**/*"])
+    })
+
+    moveFileset(settings.assets[0])
+
+    for (i = 1; i < settings.assets.length; i++) {
+
+        moveFileset(settings.assets[i])
+
+        mode.development(() => {
+
+            watcher.add([settings.assets[i].srcDir + "*", settings.assets[i].srcDir + "**/*"])
+
+        })
     }
-    watcher.on("change", triggerMove);
-    cb();
+    mode.development(() => {
+        watcher.on("change", triggerMove)
+    })
+    cb()
 }
 function triggerMove(path, stats) {
     // Parse the path
-    var p = path.split("\\");
-    var fileSet = findDirMatch(settings.assets,p);
-    moveFileSet(fileSet[0]);
+    let p = path.split("\\")
+    let fileSet = findDirMatch(settings.assets, p)
+    moveFileSet(fileSet[0])
 }
 function moveFileset(f) {
-    console.log("Moving file set " + f.name);
+    mode.development(() => {
+        console.log("Moving file set " + f.name)
+    })
     src(f.srcDir)
-    .pipe(dest(f.buildDir).on("end", function() { console.log("Finished Moving File set " + f.name)}));
+        .pipe(
+            dest(f.buildDir)
+                .on("end", function () {
+                    mode.development(
+                        () => {
+                            console.log("Finished Moving File set " + f.name)
+                        })
+                })
+        )
 }
 module.exports = moveFiles;

@@ -1,22 +1,40 @@
-var settings = require("../settings.js")();
+const settings = require("../settings.js")();
 
-var sass = require('gulp-sass');
-var cssmin = require('gulp-cssmin');
-var autoprefixer = require('gulp-autoprefixer');
-var wait = require("gulp-wait");
-
+const sass = require('gulp-sass');
+const cssmin = require('gulp-cssmin');
+const autoprefixer = require('gulp-autoprefixer');
+const wait = require("gulp-wait");
+const mode = require('gulp-mode')({
+  modes: ["production", "development"],
+  default: "development",
+  verbose: false
+})
 const { src, dest, watch } = require('gulp');
 
 var findDirMatch = require("./find-dir-match.js");
 
 function processCSS(cb) {
-    var watcher = watch([settings.stylesheets[0].srcDir + "*.scss"]);
+
+    let watcher = {}
+  
+    mode.development(() => {
+  
+      watcher = watch([settings.stylesheets[0].srcDir + "*.scss"])
+  
+    })
+
     buildCss(settings.stylesheets[0]);
+
     for (i=1;i<settings.stylesheets.length;i++) {
+
       buildCss(settings.stylesheets[i]);
+      mode.development(() => {
       watcher.add([settings.stylesheets[i].srcDir + "*.scss"]);
+      })
     }
+    mode.development(() => {
     watcher.on("change", triggerCss);
+    })
     cb();
 }
 function triggerCss(path, stats) {
@@ -26,7 +44,7 @@ function triggerCss(path, stats) {
   buildCss(thisSheet[0]); 
 }
 function buildCss(s) {
-  console.log("Processing Style sheet group " + s.name)
+  mode.development(() => {console.log("Processing Style sheet group " + s.name)})
   src(s.srcDir + '*.scss')
   .pipe(wait(200))
   .pipe(sass({
@@ -40,7 +58,7 @@ function buildCss(s) {
   .pipe(cssmin({
     keepSpecialComments: true
   }))
-  .pipe(dest(s.buildDir).on("end", function() { console.log("Finished Processing stylesheet set " + s.name)}));
+  .pipe(dest(s.buildDir).on("end", function() {   mode.development(() => {console.log("Finished Processing stylesheet set " + s.name)})}));
 }
 
 module.exports = processCSS;

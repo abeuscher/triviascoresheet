@@ -5,6 +5,7 @@ block css
 
 block content
   #player-app
-
+  
 block script
-  script(src='js/bundle.js')
+  - let ext = locals.mode=='production' ? '.min.js' : '.js'
+  script(src='js/bundle' + ext)

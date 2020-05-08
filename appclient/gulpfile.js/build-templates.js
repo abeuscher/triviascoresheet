@@ -1,37 +1,59 @@
-var settings = require("../settings.js")();
+const settings = require("../settings.js")()
 
-var pug = require("gulp-pug");
-var extReplace = require("gulp-ext-replace");
+const pug = require("gulp-pug")
+const extReplace = require("gulp-ext-replace")
 
-const { src, dest, watch } = require("gulp");
+const { src, dest, watch } = require("gulp")
+
+const mode = require('gulp-mode')({
+  modes: ["production", "development"],
+  default: "development",
+  verbose: false
+})
 
 function BuildTemplates(cb) {
-  // This starts the watch function, assuming there is one set of templates to work with
-  var watcher = watch([   
-    settings.templates[0].srcDir + "*.pug",
-    settings.templates[0].srcDir + "**/*.pug"
-  ]);
+
+  let watcher = {}
+
+  mode.development(() => {
+
+    // This starts the watch function, assuming there is one set of templates to work with
+    watcher = watch([
+      settings.templates[0].srcDir + "*.pug",
+      settings.templates[0].srcDir + "**/*.pug"
+    ]);
+
+  })
+
+
   buildTemplate(settings.templates[0]);
 
   // Loop through the template sets, build them for the first time, and add them to the watcher.
   for (i = 1; i < settings.templates.length; i++) {
+
     buildTemplate(settings.templates[i]);
-    watcher.add([
-      settings.templates[i].srcDir + "*.pug",
-      settings.templates[i].srcDir + "**/*.pug"
-    ]);
+
+    mode.development(() => {
+      watcher.add([
+        settings.templates[i].srcDir + "*.pug",
+        settings.templates[i].srcDir + "**/*.pug"
+      ]);
+    })
   }
 
-  // Attach the listener function to the watcher
-  watcher.on("change", triggerTemplate);
-  cb();
+  mode.development(() => {
+    // Attach the listener function to the watcher
+    watcher.on("change", triggerTemplate)
+  })
+
+  cb()
 }
 function triggerTemplate(path, stats) {
 
   // Parse the path
-  var p = path.split("\\");
-  var templateSet = findFile(p);
-  
+  let p = path.split("\\");
+  let templateSet = findFile(p);
+
   // Function to recursively try to match the path with the template set. This will be a problem is I need nested source tempalte directories,
   // But I can't think of when I would need that.
   function findFile(arr) {
@@ -54,20 +76,23 @@ function triggerTemplate(path, stats) {
 
 // Template builder
 function buildTemplate(t) {
-  console.log("Begin processing template set " + t.name);
+  mode.development(() => { console.log("Begin processing template set " + t.name) })
   src(t.srcDir + "*.pug")
     .pipe(
       pug({
-        pretty: true,
-        locals : {
-          siteurl: ""
+        pretty: mode.development() ? true : false,
+        locals: {
+          siteurl: "",
+          mode: mode.development() ? "development" : "production"
         }
       })
     )
     .pipe(extReplace(".html"))
     .pipe(
-      dest(t.buildDir).on("end", function() {
-        console.log("Finished processing template set " + t.name);
+      dest(t.buildDir).on("end", () => {
+
+        mode.development(() => { console.log("Finished processing template set " + t.name) })
+
       })
     );
 }
