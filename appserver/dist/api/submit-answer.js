@@ -8,13 +8,13 @@ module.exports = (app, models, corsOptions) => {
 
             try {
                 await thisGameModel.findById(request.body.gameid).exec((err, result) => {
+                    let usedAnswers = []
                     request.body.answer_sheet.answers.forEach((submittedAnswer, idx) => {
                         let compareAnswer = submittedAnswer.content.toLowerCase()
                         result.scoresheet.forEach(row => {
                             row.scored_sheets.forEach(sheet => {
                                 sheet.answers.forEach(answer => {
                                     if (sheet.q == request.body.answer_sheet.q && answer.correct && answer.content.toLowerCase() == compareAnswer) {
-                                        console.log("Answer match")
                                         request.body.answer_sheet.answers[idx].correct = true
                                     }
                                 })

@@ -64,7 +64,7 @@ function bundleFile(f) {
         .createWriteStream(f.buildDir + f.buildFileName)
         .on("close", function () {
           console.log("Finished Processing JS File " + f.name);
-          minifyJS(f);
+          //minifyJS(f);
         })
     );
 }

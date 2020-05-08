@@ -25,13 +25,15 @@ export default class GameForm extends Component {
                 select(name="num_questions", onChange=this.props.onSelectChange,value=this.props.game.num_questions)
                     option(value="10") 10
                     option(value="20") 20
-                DateInput(id="start_time",label="Start Time",onChange=this.props.onTimeChange,value=this.props.game.start_time)
+                DateInput(id="start_time",label="Start Time",onChange=this.props.onTimeChange,selected=new Date(this.props.game.start_time))
                 WysiwygInput(id="game",handleChange=this.props.onWysiwygChange,value=this.props.game.game_description)
                 if this.props.mode=="create"
                     button(onClick=this.props.createGame) Create Game
                 else
                     button(onClick=this.props.saveGame) Save Changes
                     button(onClick=this.props.deleteGame) Delete Game
+            .game-entry-form.padded-column.status
+                p=this.props.status
         `
     }
 }

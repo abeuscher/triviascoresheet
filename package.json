@@ -6,6 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "startclient": "gulp --cwd ./appclient",
+    "installclient":"yarn install --cwd ./appclient",
     "resetserver": "docker-compose restart",
     "startapp": "docker-compose up -d && yarn startclient"
   },

@@ -282,9 +282,9 @@ class App extends Component {
             team: team,
             scored_sheets: []
         })
-        this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "teamadded", data: team })
         this.setState(this.state)
         this.saveGame()
+        this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "teamadded", data: team })
     }
     sendTeamToWaitingRoom = team => {
         if (confirm("Are you sure you want to remove this team from the game? All of their answers up to this point will be lost. Forever. Seriously.")) {

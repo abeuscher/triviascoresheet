@@ -6,13 +6,14 @@
     font-size:.8em;
     line-height:.9;
     a {
-        color:#ccc;
+        color:$gray;
         margin-left:.5em;
-        padding:.2em;
-        border:1px solid #666;
+        padding:.2em .5em;
+        background:darken($orange,10%);
+        
         @include nice-transition();
         &:hover {
-            border-color:$white;
+            background:$orange;
             color:$white;
         }
     }

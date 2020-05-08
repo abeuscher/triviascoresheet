@@ -16,7 +16,9 @@ class DateInput extends React.Component {
                     key='datefield-'+this.props.id,
                     selected=this.props.selected,
                     value=this.props.value,
-                    onChange=this.props.onChange,
+                    onChange=date => this.props.onChange(date),
+                    dateFormat="MMMM d, yyyy h:mm aa"
+                    timeCaption="Time",
                     showTimeSelect
                     )`
     }
