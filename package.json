@@ -9,8 +9,8 @@
     "dev": "gulp --cwd ./appclient",
     "installclient":"yarn install --cwd ./appclient",
     "resetserver": "docker-compose restart",
-    "startserver-dev": "docker-compose up -d && yarn installcient && yarn dev",
-    "startserver-prod": "docker-compose up -d && yarn installcient && yarn buildproduction"
+    "startserver-dev": "docker-compose up -d && yarn installclient && yarn dev",
+    "startserver-prod": "docker-compose up -d && yarn installclient && yarn buildproduction"
   },
   "dependencies" : {
     "mongoose" : "5.9.2"
