@@ -1,6 +1,6 @@
 dB.createUser({
-    user:"abeuscher",
-    pw:"32feet",
+    user:"rootu",
+    pw:"password",
     roles : [{
         role:"readWrite",
         database:"testdb"
