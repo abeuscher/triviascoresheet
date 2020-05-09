@@ -54,7 +54,7 @@ function buildCss(s) {
     .on('error', error => {
 
       console.log("CSS ERROR", error);
-      this.emit('end');
+      //this.emit('end');
 
     })
     .pipe(autoprefixer())
