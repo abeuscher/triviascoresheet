@@ -7,7 +7,7 @@ services:
     volumes:
       - 'mongodata:/data/db'
     networks:
-      - beuschernet
+      - trivianetwork
     environment:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_ROOT_DATABASE}
       MONGO_INITDB_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
@@ -30,7 +30,7 @@ services:
     links:
       - "appserver:appserver"
     networks:
-      - beuschernet      
+      - trivianetwork      
   appserver:
     build: 
       context: ./
@@ -44,7 +44,7 @@ services:
     links:
       - "mongodb:mongodb"
     networks:
-      - beuschernet     
+      - trivianetwork     
     volumes:
       - ./appserver/dist:/usr/src/app/dist   
       - ./schemas:/usr/src/app/schemas   
@@ -59,15 +59,15 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongodb
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      ME_CONFIG_BASICAUTH_USERNAME: ""
-      ME_CONFIG_BASICAUTH_PASSWORD: ""
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
     depends_on:
       - mongodb    
     networks:
-      - beuschernet
+      - trivianetwork
     links:
       - "mongodb:mongodb"
 networks:
-  beuschernet:
+  trivianetwork:
 volumes:
   mongodata:
