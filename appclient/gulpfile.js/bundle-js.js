@@ -9,24 +9,12 @@ const { src, dest, watch } = require("gulp")
 
 const findDirMatch = require("./find-dir-match.js")
 
-const mode = require('gulp-mode')({
-  modes: ["production", "development"],
-  default: "development",
-  verbose: false
-})
+const mode = require('gulp-mode')()
+const devFlag = mode.development()
 
 function bundleJS(cb) {
 
-  let watcher = {};
-
-  mode.development(() => {
-
-    // This instantiates the watch function, assuming there is at least one js file in the project. If not this probably should be disabled in default.
-    watcher = watch([
-      settings.jsFiles[0].srcDir + "*", settings.jsFiles[0].srcDir + "**/*"
-    ]);
-
-  })
+  let watcher = devFlag ? watch([settings.jsFiles[0].srcDir + "*", settings.jsFiles[0].srcDir + "**/*"]) : {};
 
   bundleFile(settings.jsFiles[0]);
 
@@ -34,23 +22,19 @@ function bundleJS(cb) {
   for (let i = 1; i < settings.jsFiles.length; i++) {
 
     bundleFile(settings.jsFiles[i])
-
-    mode.development(() => {
-
+    if (devFlag) {
       watcher.add([
         settings.jsFiles[i].srcDir + "*", settings.jsFiles[i].srcDir + "**/*"
       ])
-
-    })
-
+    }
   }
 
   // Add the listener event to the watcher
-  mode.development(()=>{
+  if (devFlag) {
 
     watcher.on("change", triggerJS)
 
-  })
+  }
 
   cb()
 
@@ -70,9 +54,7 @@ function triggerJS(path, stats) {
 
 // Bundler function. 
 function bundleFile(f) {
-  mode.development(() => { 
-    console.log("Begin processing JS file " + f.name)
-  })
+  console.log("Begin processing JS file " + f.name)
 
   browserify({
     entries: f.srcDir + f.srcFileName,
@@ -87,22 +69,24 @@ function bundleFile(f) {
         }
       ], "@babel/preset-react"], plugins: [require("babel-plugin-transform-react-pug"), require("@babel/plugin-proposal-class-properties")]
     })
-    //.transform("uglifyify", { global: true })
+    .transform("uglifyify", { global: true })
     .bundle()
     .on('error', function (err) {
-      mode.development(() => { 
-        console.log("ERROR ON:" + f.name + "\nERROR:", err.stack)
-      })
+
+      console.log("ERROR ON:" + f.name + "\nERROR:", err.stack)
       return false;
+
     })
     .pipe(
       fs
         .createWriteStream(f.buildDir + f.buildFileName)
         .on("close", function () {
-          mode.development(() => { 
-            console.log("Finished Processing JS File " + f.name)
-          })
-          mode.production(minifyJS(f));
+
+          console.log("Finished Processing JS File " + f.name)
+
+          if (!devFlag) {
+            minifyJS(f)
+          }
         })
     );
 }

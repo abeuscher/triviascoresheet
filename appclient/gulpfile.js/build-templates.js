@@ -5,25 +5,17 @@ const extReplace = require("gulp-ext-replace")
 
 const { src, dest, watch } = require("gulp")
 
-const mode = require('gulp-mode')({
-  modes: ["production", "development"],
-  default: "development",
-  verbose: false
-})
+const mode = require('gulp-mode')()
+const devFlag = mode.development()
 
 function BuildTemplates(cb) {
 
-  let watcher = {}
-
-  mode.development(() => {
-
-    // This starts the watch function, assuming there is one set of templates to work with
-    watcher = watch([
+  let watcher = devFlag ?
+    watch([ // This starts the watch function, assuming there is one set of templates to work with
       settings.templates[0].srcDir + "*.pug",
       settings.templates[0].srcDir + "**/*.pug"
-    ]);
-
-  })
+    ])
+    : {}
 
 
   buildTemplate(settings.templates[0]);
@@ -33,18 +25,18 @@ function BuildTemplates(cb) {
 
     buildTemplate(settings.templates[i]);
 
-    mode.development(() => {
+    if (devFlag) {
       watcher.add([
         settings.templates[i].srcDir + "*.pug",
         settings.templates[i].srcDir + "**/*.pug"
       ]);
-    })
+    }
   }
 
-  mode.development(() => {
+  if (devFlag) {
     // Attach the listener function to the watcher
     watcher.on("change", triggerTemplate)
-  })
+  }
 
   cb()
 }
@@ -76,7 +68,7 @@ function triggerTemplate(path, stats) {
 
 // Template builder
 function buildTemplate(t) {
-  mode.development(() => { console.log("Begin processing template set " + t.name) })
+  console.log("Begin processing template set " + t.name)
   src(t.srcDir + "*.pug")
     .pipe(
       pug({
@@ -91,7 +83,7 @@ function buildTemplate(t) {
     .pipe(
       dest(t.buildDir).on("end", () => {
 
-        mode.development(() => { console.log("Finished processing template set " + t.name) })
+        console.log("Finished processing template set " + t.name)
 
       })
     );

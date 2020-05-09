@@ -17,7 +17,9 @@ export default class AnswerBasket extends Component {
                 .answer-basket.padded-column.section-title
                     h2="Answer Basket ("+this.props.answers.length+" pending)"
                 .answer-basket.answer-carousel
-                    for ticket,idx in this.props.answers
+                    - let idx = 0
+                    while idx<2 && this.props.answers[idx]
+                        - let ticket = this.props.answers[idx]
                         .answer-sheet(key='answer-basket-row-'+idx)
                             p.question(key='answer-basket-question-label'+idx)="Question #"+ticket.answer_sheet.q
                             p.team(key='answer-basket-team-label-'+idx)=ticket.team.team_name
@@ -55,7 +57,8 @@ export default class AnswerBasket extends Component {
                                                 )
                                         
                             a.button.score-answer(key='answer-basket-button-'+idx,href="#",onClick=e=>{e.preventDefault();this.props.scoreAnswer(idx)}) Move to scoresheet  
-                            a.button.delete-answer(key='answer-basket-delete-'+idx,href="#",onClick=e=>{e.preventDefault();this.props.deleteAnswer(ticket)}) Delete                     
+                            a.button.delete-answer(key='answer-basket-delete-'+idx,href="#",onClick=e=>{e.preventDefault();this.props.deleteAnswer(ticket)}) Delete      
+                        - idx++               
         `
     }
 }

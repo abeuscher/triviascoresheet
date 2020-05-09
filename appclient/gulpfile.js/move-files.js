@@ -1,10 +1,7 @@
 const settings = require("../settings.js")();
 
-const mode = require('gulp-mode')({
-    modes: ["production", "development"],
-    default: "development",
-    verbose: false
-})
+const mode = require('gulp-mode')()
+const devFlag = mode.development()
 
 const { src, dest, watch } = require('gulp');
 
@@ -12,12 +9,7 @@ const findDirMatch = require("./find-dir-match.js");
 
 function moveFiles(cb) {
 
-    let watcher = {}
-
-    mode.development(() => {
-
-        watcher = watch([settings.assets[0].srcDir + "*", settings.assets[0].srcDir + "**/*"])
-    })
+    let watcher = devFlag ? watch([settings.assets[0].srcDir + "*", settings.assets[0].srcDir + "**/*"]) : {}
 
     moveFileset(settings.assets[0])
 
@@ -25,15 +17,15 @@ function moveFiles(cb) {
 
         moveFileset(settings.assets[i])
 
-        mode.development(() => {
-
+        if (devFlag) {
             watcher.add([settings.assets[i].srcDir + "*", settings.assets[i].srcDir + "**/*"])
-
-        })
+        }
+        
     }
-    mode.development(() => {
+    if (devFlag) {
         watcher.on("change", triggerMove)
-    })
+    }
+
     cb()
 }
 function triggerMove(path, stats) {
@@ -43,18 +35,11 @@ function triggerMove(path, stats) {
     moveFileSet(fileSet[0])
 }
 function moveFileset(f) {
-    mode.development(() => {
-        console.log("Moving file set " + f.name)
-    })
+    console.log("Moving file set " + f.name)
     src(f.srcDir)
         .pipe(
             dest(f.buildDir)
-                .on("end", function () {
-                    mode.development(
-                        () => {
-                            console.log("Finished Moving File set " + f.name)
-                        })
-                })
+                .on("end", () => { console.log("Finished Moving File set " + f.name) })
         )
 }
 module.exports = moveFiles;
