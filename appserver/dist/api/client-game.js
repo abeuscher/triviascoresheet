@@ -10,11 +10,15 @@ module.exports = (app, models, corsOptions) => {
                     .populate({ path: "waiting_room", populate: { path: "team" } })
                     .populate("scoresheet.team")
                     .exec()
-                let output = { error: "no match" }
+                let output = false
+                let teams = []
                 thisGame.waiting_room.forEach(team => {
                     team.users.forEach(user => {
                         if (user._id == request.body.userid) {
                             output = {status:"waiting_room",data:team}
+                        }
+                        else {
+                            teams.push(team)
                         }
                     })
                 })
@@ -23,9 +27,21 @@ module.exports = (app, models, corsOptions) => {
                         if (user._id == request.body.userid) {
                             output = {status:"active",data:row.team}
                         }
+                        else {
+                            teams.push(row.team) 
+                        }
                     })
                 })
-                response.send(output);
+                if (output) {
+                    response.json(output)
+                }
+                else if (teams.length) {
+                    response.json({teams:teams})
+                }
+                else {
+                    response.json({error:"No teams yet."})
+                }
+                
             } catch (e) {
                 console.log("Error on get game plus team", e)
                 response.json({ err: "Error on Get Game Plus Team", msg: e })

@@ -38,7 +38,7 @@ services:
     restart: 'always'
     hostname: ${SERVER_HOSTNAME}
     ports:
-      - ${API_PORT}
+      - 5000:5000
     depends_on:
       - mongodb
     links:
@@ -51,6 +51,7 @@ services:
   mongoexpress:
     image: mongo-express
     container_name: mongo-express
+    hostname: ${SERVER_HOSTNAME}
     ports:
       - 8081:8081
     env_file:

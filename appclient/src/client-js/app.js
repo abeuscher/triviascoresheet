@@ -38,13 +38,21 @@ class App extends Component {
         }
         ApiConnector("read", JSON.stringify(queryData))
             .then(res => {
-                if (!res.error) {
+                console.log("Get user:",res)
+                if (res.teams) {
+                    this.state.teams = res.teams
+                    this.setState(this.state)
+                }
+                else if (res.status) {
                     this.state.mode = res.status
                     this.state.team = res.data
                     this.setState(this.state)
-                    this.refreshGame()
+                    this.refreshGame()  
                 }
             })
+    }
+    joinTeam = team => {
+        
     }
     logout = e => {
         if (e) {

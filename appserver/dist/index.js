@@ -16,6 +16,7 @@ const Signup = require("./api/signup")
 const Update = require("./api/update")
 const UpdateGame = require("./api/update-game")
 const io = require("./api/io")
+const Audio = require("./api/audio")
 const env = require("./env")()
 
 
@@ -64,3 +65,4 @@ let server = app.listen(5000, () => {
 
 });
 io(server)
+Audio(app,server)

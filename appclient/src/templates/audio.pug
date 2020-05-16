@@ -1,0 +1,11 @@
+extends ./inc/page
+
+block css
+  link(href="css/screen.css",type="text/css",rel="stylesheet")
+
+block content
+  #audio-app
+  
+block script
+  - let ext = locals.mode=='production' ? '.min.js' : '.js'
+  script(src='js/audio-bundle' + ext)
