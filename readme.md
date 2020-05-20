@@ -11,7 +11,7 @@ Dependencies:
 
 To Install:
 
-1. Add .env, appclient/src/env.js, appserver/dist/env.js (sample files in root with instructions)
+1. Add .env, appserver/dist/env.js (sample files in root)
 2. yarn install
 3. yarn startserver-dev to build and launch dev environment, or yarn startserver-prod
 
@@ -24,6 +24,7 @@ Wishlist
 - Add "buzzer" for lightning round (would be a fun finisher and a way to actually award prizes)
 - Could also do this through chat rather than video - fire questions at specific players / teams and show their answers in real time to audience or prize individually.
 
+Adding https and Certs.
 
 Currently Adding audio:
 - Add team functionality
