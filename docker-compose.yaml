@@ -3,7 +3,7 @@ version: "3"
 services:
   reverse:
     container_name: reverse
-    image: nginx
+    image: 'nginx'
     hostname: ${SERVER_HOSTNAME}
     networks:
       - trivianetwork
@@ -19,8 +19,8 @@ services:
       - "mongodb:mongodb"
       - "mongoexpress:mongoexpress"
     volumes:
-      - ./proxy.conf:/etc/nginx/nginx.conf
-      - ./certs:/etc/nginx/ssl-certs/
+      - ${PATH_TO_CONF}:/etc/nginx/nginx.conf
+      - ${PATH_TO_CERTS}:/etc/letsencrypt
   mongodb:
     image: 'mongo:latest'
     container_name: 'mongodb'
@@ -83,3 +83,4 @@ networks:
   trivianetwork:
 volumes:
   mongodata:
+  letsencrypt:
