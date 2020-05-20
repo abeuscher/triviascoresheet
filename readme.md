@@ -12,8 +12,9 @@ Dependencies:
 To Install:
 
 1. Add .env, appserver/dist/env.js (sample files in root)
-2. yarn install
-3. yarn startserver-dev to build and launch dev environment, or yarn startserver-prod
+2. Deal with certs. Path in the config file. Use whatever solution you prefer. This app will not run over an insecure connection.
+3. yarn install
+4. yarn startserver-dev to build and launch dev environment, or yarn startserver-prod
 
 Wishlist
 - Video
@@ -23,10 +24,3 @@ Wishlist
 - Multiple players on a team (figure out how to manage controls)
 - Add "buzzer" for lightning round (would be a fun finisher and a way to actually award prizes)
 - Could also do this through chat rather than video - fire questions at specific players / teams and show their answers in real time to audience or prize individually.
-
-Adding https and Certs.
-
-Currently Adding audio:
-- Add team functionality
-- Add audio to client first.
-- Make it so one team member calls another team member on join when audio is enabled
