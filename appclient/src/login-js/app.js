@@ -123,7 +123,6 @@ class App extends Component {
         }
     }
     render() {
-
         return pug`
             #wrapper    
                 .login-bucket

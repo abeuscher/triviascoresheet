@@ -32,13 +32,15 @@ class App extends Component {
     getUser = () => {
         this.state.user = JSON.parse(window.sessionStorage.getItem("userstate"))
         this.setState(this.state)
+        if (!this.state.game) {
+            location.href="lobby.html"
+        }
         let queryData = {
             id: this.state.game._id,
             userid: this.state.user._id
         }
         ApiConnector("read", JSON.stringify(queryData))
             .then(res => {
-                console.log("Get user:",res)
                 if (res.teams) {
                     this.state.teams = res.teams
                     this.setState(this.state)
@@ -65,15 +67,9 @@ class App extends Component {
         window.sessionStorage.removeItem("gamestate")
         location.href = "login.html"
     }
-    socket = io(Env().api)
+    socket = this.socket || io(Env().api)
     makeSocketConnection = () => {
         this.socket.on('connect', () => {
-            console.log("sending", {
-                gameid: this.state.game._id,
-                teamid: this.state.team._id,
-                userid: this.state.user._id,
-                username: this.state.user.username
-            })
             this.socket.emit("clientjoin", {
                 gameid: this.state.game._id,
                 teamid: this.state.team._id,
@@ -94,6 +90,18 @@ class App extends Component {
             this.socket.on("hostchat", msg => {
                 this.getMessage("host", msg)
             })
+            /*
+            this.socket.on("audio-stream", (stream, data) =>  {
+                let parts = [];
+                stream.on('data', function(chunk){
+                    parts.push(chunk);
+                });
+                stream.on('end', function () {
+                    audio.src = (window.URL || window.webkitURL).createObjectURL(new Blob(parts));
+                    audio.play();
+                });
+            });
+            */
             this.socket.on('disconnect', () => {
                 console.log("Socket dropped")
             });
@@ -120,7 +128,7 @@ class App extends Component {
     handleDroppedConnection = () => {
         console.log("Connection to host lost. Reconnecting...")
         this.socket = io(Env().api)
-        this.setState(this.state)
+        this.makeSocketConnection()
     }
     handleGameControl = msg => {
         if (msg.action == "refresh") {
@@ -422,13 +430,14 @@ class App extends Component {
     changeBid = e => {
         this.state.current_bid = e.target.options[e.target.selectedIndex].value
         this.setState(this.state)
-        console.log("Bid chnaged", this.state)
     }
     render() {
 
         return pug`
                 if this.state.error!=""
                     h2.error=this.state.error
+                else if !this.state.joined_game_chat
+                    h2 Waiting to join chat...
                 else
                     LoginBar(
                         user=this.state.user,

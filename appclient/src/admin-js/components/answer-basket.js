@@ -20,7 +20,10 @@ export default class AnswerBasket extends Component {
                     for ticket, idx in this.props.answers
                         .answer-sheet(key='answer-basket-row-'+idx)
                             p.question(key='answer-basket-question-label'+idx)="Question #"+ticket.answer_sheet.q
-                            p.team(key='answer-basket-team-label-'+idx)=ticket.team.team_name
+                            if ticket.team
+                                p.team(key='answer-basket-team-label-'+idx)=ticket.team.team_name
+                            else
+                                p This is a broken ticket with no team. WTF?
                             .answer-box.flex(key='answer-basket-answer-'+idx)
                                 .column.three-quarter.answer-header(key="answer-basket-answer-column-"+idx)
                                     p.label(key="answer-basket-answer-label-"+idx) answer

@@ -28,7 +28,7 @@ class App extends Component {
         this.state = saveState ? saveState : this.defaultState;
         this.makeSocketConnection()
 
-        if (saveState && this.state.mode=="play") {
+        if (saveState && this.state.mode == "play") {
             this.refreshGame()
         }
 
@@ -62,8 +62,8 @@ class App extends Component {
             this.socket.emit("identify host", "Hey guys!")
             this.socket.emit("hostjoin", {
                 gameid: this.state.game._id,
-                userid:this.state.user._id,
-                username:this.state.user.username
+                userid: this.state.user._id,
+                username: this.state.user.username
             })
             this.socket.on("gamechat", msg => {
                 this.getMessage("gamechat", msg)
@@ -72,7 +72,6 @@ class App extends Component {
                 this.getMessage("gamestatus", msg)
                 this.handleGameControl(msg)
             })
-
             console.log("Socket connected")
         });
         this.socket.on('disconnect', function () {
@@ -80,7 +79,7 @@ class App extends Component {
         });
     }
     handleGameControl = msg => {
-        if (msg.action=="hostrefresh") {
+        if (msg.action == "hostrefresh") {
             this.refreshGame()
         }
     }
@@ -105,7 +104,7 @@ class App extends Component {
                     className: "intro",
                     msg: "This tracks the sequence of events in the game.",
                     data: null,
-                    status:"unread"
+                    status: "unread"
                 }]
             },
             gamechat: {
@@ -115,7 +114,7 @@ class App extends Component {
                     className: "intro",
                     msg: "This is the game chat. Messages here are visible to all players in the game.",
                     data: null,
-                    status:"unread"
+                    status: "unread"
                 }]
             }
         }
@@ -127,7 +126,7 @@ class App extends Component {
         }, {
             label: "Create New Game",
             action: this.newGame
-        },{
+        }, {
             label: "Manage Users",
             action: this.fetchUsers
         }]
@@ -138,9 +137,9 @@ class App extends Component {
 
     getLocalStorage = () => {
         if (window.sessionStorage.getItem("adminstate") != undefined) {
-            let thisState = JSON.parse(window.sessionStorage.getItem("adminstate","utf-8"))
-            if (typeof thisState.game=="Array") {
-                thisState.game = JSON.parse(window.sessionStorage.getItem("adminstate","utf-8")).game[0]
+            let thisState = JSON.parse(window.sessionStorage.getItem("adminstate", "utf-8"))
+            if (typeof thisState.game == "Array") {
+                thisState.game = JSON.parse(window.sessionStorage.getItem("adminstate", "utf-8")).game[0]
             }
             return thisState
         }
@@ -205,35 +204,35 @@ class App extends Component {
     }
     deleteGame = record => {
         if (confirm("Are you sure you want to delete this game?")) {
-            ApiConnector("delete",JSON.stringify(record),"game")
-                .then(res=>{
+            ApiConnector("delete", JSON.stringify(record), "game")
+                .then(res => {
                     if (res.deleted) {
                         this.fetchGames()
                     }
                     else {
                         console.log(res)
                     }
-                })            
+                })
         }
     }
     deleteTeam = team => {
         if (confirm("Are you sure you want to remove this team from the game?")) {
-            ApiConnector("delete",JSON.stringify(team),"team")
-                .then(res=>{
-                    this.state.game.waiting_room = this.state.game.waiting_room.filter(item=>{return item._id!=team._id})
-                    this.state.game.scoresheet = this.state.game.scoresheet.filter(item=>{return item.team._id!=team._id})
+            ApiConnector("delete", JSON.stringify(team), "team")
+                .then(res => {
+                    this.state.game.waiting_room = this.state.game.waiting_room.filter(item => { return item._id != team._id })
+                    this.state.game.scoresheet = this.state.game.scoresheet.filter(item => { return item.team._id != team._id })
                     this.setState(this.state)
                     console.log(res)
-                    this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "teamdeleted", data: team })
-                })            
-        }        
+                    this.socket.emit("gamestatus", { gameid: this.state.game._id, action: "teamdeleted", data: team })
+                })
+        }
     }
     deleteAnswer = answer => {
         if (confirm("Are you sure? The team will need to submit a new answer")) {
-            this.state.game.answer_basket = this.state.game.answer_basket.filter(thisAnswer=>{return thisAnswer!=answer})
-            this.setState(this.state)   
-            this.saveGame() 
-            this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "answerdeleted", data: answer })   
+            this.state.game.answer_basket = this.state.game.answer_basket.filter(thisAnswer => { return thisAnswer != answer })
+            this.setState(this.state)
+            this.saveGame()
+            this.socket.emit("gamestatus", { gameid: this.state.game._id, action: "answerdeleted", data: answer })
         }
 
     }
@@ -248,11 +247,11 @@ class App extends Component {
         this.state.game.current_question = 1
         this.setState(this.state)
         this.saveGame();
-        this.socket.emit("gamestatus", {gameid:this.state.game._id,action:"refresh",msg:"The game has started! Huzzah!"})
+        this.socket.emit("gamestatus", { gameid: this.state.game._id, action: "refresh", msg: "The game has started! Huzzah!" })
     }
     createGame = e => {
         e.preventDefault()
-        ApiConnector("create", JSON.stringify(this.state.game),"game")
+        ApiConnector("create", JSON.stringify(this.state.game), "game")
             .then(res => {
                 this.state.game = res
                 this.state.mode = "edit"
@@ -268,11 +267,11 @@ class App extends Component {
             })
     }
     fetchUsers = () => {
-        ApiConnector("get","","user")
-            .then(res=>{
-                console.log("Users:",res)
-                this.state.mode="usermanager"
-                this.state.users=res
+        ApiConnector("get", "", "user")
+            .then(res => {
+                console.log("Users:", res)
+                this.state.mode = "usermanager"
+                this.state.users = res
                 this.setState(this.state)
             })
     }
@@ -284,16 +283,16 @@ class App extends Component {
         })
         this.setState(this.state)
         this.saveGame()
-        this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "teamadded", data: team })
+        this.socket.emit("gamestatus", { gameid: this.state.game._id, action: "teamadded", data: team })
     }
     sendTeamToWaitingRoom = team => {
         if (confirm("Are you sure you want to remove this team from the game? All of their answers up to this point will be lost. Forever. Seriously.")) {
             this.state.game.scoresheet = this.state.game.scoresheet.filter(t => { return t.team._id != team._id })
-            this.state.game.waiting_room.push(team)  
-            this.socket.emit("gamestatus", { gameid:this.state.game._id,action: "teamremoved", data: team })
+            this.state.game.waiting_room.push(team)
+            this.socket.emit("gamestatus", { gameid: this.state.game._id, action: "teamremoved", data: team })
             this.setState(this.state)
-            console.log("Team moved",this.state, team)
-            this.saveGame()            
+            console.log("Team moved", this.state, team)
+            this.saveGame()
         }
     }
     refreshGame = () => {
@@ -304,7 +303,7 @@ class App extends Component {
             .then(res => {
                 this.state.game = res
                 this.setState(this.state)
-                if (this.state.mode=="play") {
+                if (this.state.mode == "play") {
                     this.labelAnswerSheets()
                 }
             })
@@ -326,21 +325,21 @@ class App extends Component {
     tickAnswer = (e, basket_idx, answer_idx) => {
         let calculatedScore = 0;
         this.state.game.answer_basket[basket_idx].answer_sheet.answers[answer_idx].correct = e.target.checked
-        if (this.state.game.answer_basket[basket_idx].answer_sheet.q%10==0) {
-            calculatedScore=(this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].correct ? this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].bid : -1 * (this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].bid/2))
+        if (this.state.game.answer_basket[basket_idx].answer_sheet.q % 10 == 0) {
+            calculatedScore = (this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].correct ? this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].bid : -1 * (this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].bid / 2))
         }
         else {
-            this.state.game.answer_basket[basket_idx].answer_sheet.answers.forEach(answer=>{
+            this.state.game.answer_basket[basket_idx].answer_sheet.answers.forEach(answer => {
                 calculatedScore += answer.correct ? answer.bid : 0
-            })             
+            })
         }
 
-        this.state.game.answer_basket[basket_idx].answer_sheet.score=calculatedScore
+        this.state.game.answer_basket[basket_idx].answer_sheet.score = calculatedScore
         this.setState(this.state)
     }
     changeScore = e => {
         e.preventDefault()
-        this.state.game.answer_basket[e.target.getAttribute("data-basket-idx")].answer_sheet.score=e.target.value
+        this.state.game.answer_basket[e.target.getAttribute("data-basket-idx")].answer_sheet.score = e.target.value
         this.setState(this.state)
     }
     scoreAnswer = answer_idx => {
@@ -348,23 +347,23 @@ class App extends Component {
         this.state.game.scoresheet.forEach(row => {
             if (row.team._id == thisTeam._id) {
                 let thisSheet = this.state.game.answer_basket[answer_idx].answer_sheet
-                thisSheet.status="scored"
+                thisSheet.status = "scored"
                 let calculatedScore = 0
-                if (thisSheet.q%10==0) {
-                    calculatedScore=(thisSheet.answers[0].correct ? thisSheet.answers[0].bid : -1 * (thisSheet.answers[0].bid/2))
+                if (thisSheet.q % 10 == 0) {
+                    calculatedScore = (thisSheet.answers[0].correct ? thisSheet.answers[0].bid : -1 * (thisSheet.answers[0].bid / 2))
                 }
                 else {
-                    thisSheet.answers.forEach(answer=>{
+                    thisSheet.answers.forEach(answer => {
                         calculatedScore += answer.correct ? answer.bid : 0
                     })
-                }                  
+                }
 
-                if (thisSheet.score!=calculatedScore && thisSheet.score!=0) {
-                    thisSheet.status="override"
+                if (thisSheet.score != calculatedScore && thisSheet.score != 0) {
+                    thisSheet.status = "override"
                 }
                 else {
-                    thisSheet.score=calculatedScore
-                    thisSheet.status="scored"
+                    thisSheet.score = calculatedScore
+                    thisSheet.status = "scored"
                 }
                 row.scored_sheets.push(thisSheet)
                 this.state.game.answer_basket.splice(answer_idx, 1)
@@ -418,9 +417,9 @@ class App extends Component {
             .then(res => {
                 if (!res.error) {
                     this.refreshGame()
-                    this.socket.emit("gamestatus", {gameid:this.state.game._id,type:"control",action:"refresh",msg:"Beginning Question #" + newQ})
+                    this.socket.emit("gamestatus", { gameid: this.state.game._id, type: "control", action: "refresh", msg: "Beginning Question #" + newQ })
                 }
-                
+
             })
     }
     generateCode = () => {
@@ -448,18 +447,18 @@ class App extends Component {
             gameid: this.state.game._id,
             userid: this.state.user._id,
             username: this.state.user.username,
-            host:true,
+            host: true,
             msg: msg,
-            status:"unread"
+            status: "unread"
         })
     }
     changeChat = e => {
         e.preventDefault()
-        this.state.io[e.target.getAttribute("data-key")].current_message=e.target.value
+        this.state.io[e.target.getAttribute("data-key")].current_message = e.target.value
         this.setState(this.state)
     }
     chatkeyDown = e => {
-        if (e.key=="Enter") {
+        if (e.key == "Enter") {
             e.preventDefault()
             this.sendChat()
         }
@@ -474,26 +473,26 @@ class App extends Component {
             this.state.io[e.target.getAttribute("data-key")].current_message = ""
         }
         else {
-            sendValue = this.state.io.gamechat.current_message 
+            sendValue = this.state.io.gamechat.current_message
             sendTarget = "gamechat"
             this.state.io.gamechat.current_message = ""
         }
-        
-        this.sendMessage(sendTarget,sendValue)
+
+        this.sendMessage(sendTarget, sendValue)
         this.setState(this.state)
     }
     changeUserPrivileges = e => {
-        this.state.users[e.target.getAttribute("data-idx")][e.target.name]=e.target.checked;
+        this.state.users[e.target.getAttribute("data-idx")][e.target.name] = e.target.checked;
         this.setState(this.state)
-        ApiConnector("update",JSON.stringify(this.state.users[e.target.getAttribute("data-idx")]),"user")
-            .then(res=>{
+        ApiConnector("update", JSON.stringify(this.state.users[e.target.getAttribute("data-idx")]), "user")
+            .then(res => {
                 this.fetchUsers()
-            })  
+            })
     }
     deleteUser = user => {
         if (confirm("Are you sure you want to delete this user?")) {
-            ApiConnector("delete",JSON.stringify(user),"user")
-                .then(res=>{
+            ApiConnector("delete", JSON.stringify(user), "user")
+                .then(res => {
                     this.fetchUsers()
                 })
         }
