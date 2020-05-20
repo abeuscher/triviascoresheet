@@ -3,6 +3,7 @@ yarn.lock
 package-lock.json
 .env
 /!.env
+appclient/src/env.js
 appserver/dist/env.js
 appclient/public_html
 appserver/node_modules
