@@ -6,6 +6,7 @@ import AnswerForm from './components/answer-form'
 import LoginBar from './components/login-bar'
 import ClientChat from './components/client-chat'
 import DefaultGameState from '../common-js/default-game-state'
+import ConvertDate from '../common-js/convert-date'
 
 import ApiConnector from './components/api-connector'
 
@@ -90,18 +91,6 @@ class App extends Component {
             this.socket.on("hostchat", msg => {
                 this.getMessage("host", msg)
             })
-            /*
-            this.socket.on("audio-stream", (stream, data) =>  {
-                let parts = [];
-                stream.on('data', function(chunk){
-                    parts.push(chunk);
-                });
-                stream.on('end', function () {
-                    audio.src = (window.URL || window.webkitURL).createObjectURL(new Blob(parts));
-                    audio.play();
-                });
-            });
-            */
             this.socket.on('disconnect', () => {
                 console.log("Socket dropped")
             });
@@ -155,15 +144,9 @@ class App extends Component {
             }
         }
         if (msg.action == "answerdeleted") {
-            if (this.state.team._id==msg.data.team._id) {
-                console.log("found match")
-                this.state.team.answer_history = this.state.team.answer_history.filter(answer=>{return answer.q!=msg.data.answer_sheet.q})
+            if (this.state.team._id==msg.data) {
+                 this.refreshTeam()
             }
-            this.setState(this.state)
-            this.updateTeam()
-            this.checkBids()
-            this.newAnswerSheet()
-            this.showMessage("error","Your answer to question #"+msg.data.answer_sheet.q + " was deleted for some reason.")
         }
 
     }
@@ -337,6 +320,23 @@ class App extends Component {
                 }
             })
     }
+    refreshTeam = () => {
+        let formData = {
+            id: this.state.team._id
+        }       
+        ApiConnector("getTeam",JSON.stringify(formData))
+            .then(res=>{
+                if (res.err) {
+                    console.log(res.err)
+                }
+                else {
+                    this.state.team=res
+                    this.setState(this.state)
+                    this.checkBids()
+                    this.newAnswerSheet()
+                }
+            }) 
+    }
     refreshGame = () => {
         let formData = {
             id: this.state.game._id
@@ -373,6 +373,7 @@ class App extends Component {
             this.checkBids()
         }
         else {
+            console.log("Fail on",this.state.team.answer_history)
             this.state.current_answer_sheet = null
             this.setState(this.state)
         }
@@ -434,15 +435,36 @@ class App extends Component {
     render() {
 
         return pug`
-                if this.state.error!=""
-                    h2.error=this.state.error
-                else if !this.state.joined_game_chat
-                    h2 Waiting to join chat...
+                if !this.state.joined_game_chat
+                    h2 Waiting to join game...
                 else
                     LoginBar(
                         user=this.state.user,
                         logout=this.logout
                         )
+                    header.page-header
+                        .logo
+                            img(src="/images/logo.png")
+                        .site-title
+                            h1 Online Pub Trivia
+                    .game-header.flex
+                        if this.state.game
+                            .column.three-fifth
+                                .details
+                                    h2=this.state.game.game_title
+                                    h3="Playing as: "
+                                        span.team.white=this.state.team.team_name
+                                    if this.state.game.current_question==0
+                                        p="Starts: " + ConvertDate(this.state.game.start_time)
+                                    else if this.state.game.current_question==20
+                                        h3
+                                            span.white Game Completed.
+                                    else
+                                        h3="Current Question: "
+                                            span.white=this.state.game.current_question
+                            .column.two-fifth.description-bucket
+                                h2 Game Description:
+                                .description(dangerouslySetInnerHTML={__html:this.state.game.game_description})
                     #wrapper
                         .flex
                             .column.three-fifth

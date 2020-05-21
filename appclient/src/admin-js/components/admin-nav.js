@@ -7,10 +7,6 @@ export default class AdminNav extends Component {
     }
     render() {
         return pug`
-        nav    
-            .admin-controls
-                for button,idx in this.props.adminButtons
-                    a.button(key="admin-nav-"+idx,href="#", onClick=button.action)=button.label
             if this.props.mode=="play"
                 .game-controls
                     .info-block
@@ -32,7 +28,7 @@ export default class AdminNav extends Component {
                         if this.props.game.current_question==0
                             a.button.next-question(key="scoresheet-btn-start",href="#",onClick=this.props.beginGame) Begin Game
                         else if this.props.game.current_question<this.props.game.num_questions
-                            a.button.next-question(key="scoresheet-btn-next-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question+1)}) Next Question                        
+                            a.button.next-question(key="scoresheet-btn-next-question",href="#",onClick=()=>{this.props.changeQuestion(this.props.game.current_question+1)}) Next Question                     
 
     `
     }

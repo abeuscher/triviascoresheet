@@ -124,6 +124,11 @@ class App extends Component {
     }
     render() {
         return pug`
+            header.page-header
+                .logo
+                    img(src="/images/logo.png")
+                .site-title
+                    h1 Online Pub Trivia
             #wrapper    
                 .login-bucket
                     if this.state.view=="signup"

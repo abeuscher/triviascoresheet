@@ -6,12 +6,14 @@ export default class LoginBar extends Component {
     }
     render() {
         return pug`
+        if this.props.user
             .login-bar
-                if this.props.user
+                nav
+                    if this.props.user.admin
+                        a(href="admin.html") admin   
+                .status
                     p="logged in as "
                         strong=this.props.user.username
-                        if this.props.user.admin
-                            a(href="admin.html") admin                        
                         a(href="#",onClick=this.props.logout) logout
         `
     }

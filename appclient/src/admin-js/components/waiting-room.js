@@ -8,10 +8,7 @@ export default class WaitingRoom extends Component {
 
     render() {
         return pug`
-            if !this.props.waiting_room.length               
-                .waiting-room.padded-column.section-title
-                    h2 Waiting Room (Empty)
-            else
+            if this.props.waiting_room.length               
                 .waiting-room.padded-column.section-title
                     h2="Waiting Room ("+this.props.waiting_room.length+" teams waiting)"
                 for team,idx in this.props.waiting_room

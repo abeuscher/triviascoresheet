@@ -131,6 +131,15 @@ class App extends Component {
             action: this.fetchUsers
         }]
     }
+    blankAnswer = {
+        team: null,
+        answer_sheet: {
+            status: 'unsubmitted',
+            score: 0,
+            answers: [],
+            created: new Date()
+        }
+    }
     setLocalStorage = () => {
         window.sessionStorage.setItem("adminstate", JSON.stringify(this.state));
     }
@@ -145,7 +154,13 @@ class App extends Component {
         }
         return false
     }
-
+    checkForAnswerSheet = () => {
+        if (!this.state.game.current_answer.team && this.state.game.answer_basket.length) {
+            this.state.game.current_answer = this.state.game.answer_basket.pop()
+            this.setState(this.state)
+            this.saveGame()
+        }
+    }
     wipeLocalStorage = () => {
         window.sessionStorage.removeItem("adminstate")
         var f = window.sessionStorage.getItem("adminstate")
@@ -229,12 +244,21 @@ class App extends Component {
     }
     deleteAnswer = answer => {
         if (confirm("Are you sure? The team will need to submit a new answer")) {
-            this.state.game.answer_basket = this.state.game.answer_basket.filter(thisAnswer => { return thisAnswer != answer })
-            this.setState(this.state)
-            this.saveGame()
-            this.socket.emit("gamestatus", { gameid: this.state.game._id, action: "answerdeleted", data: answer })
-        }
+            ApiConnector("deleteAnswer", JSON.stringify(this.state.game.current_answer))
+                .then(res => {
+                    let clientMsg = { gameid: this.state.game._id, action: "answerdeleted", data: this.state.game.current_answer.team._id };
 
+                    if (this.state.game.answer_basket.length) {
+                        this.state.game.current_answer = this.state.game.answer_basket.pop()
+                    }
+                    else {
+                        this.state.game.current_answer = this.blankAnswer
+                    }
+                    this.setState(this.state)
+                    this.saveGame()
+                    this.socket.emit("gamestatus", clientMsg)
+                })
+        }
     }
     playGame = game => {
         this.state.game = game
@@ -303,72 +327,90 @@ class App extends Component {
             .then(res => {
                 this.state.game = res
                 this.setState(this.state)
-                if (this.state.mode == "play") {
-                    this.labelAnswerSheets()
-                }
+                this.checkForAnswerSheet()
             })
     }
-    labelAnswerSheets = () => {
-        this.state.game.answer_basket.forEach(answerSheet => {
-            let teamID = answerSheet.team._id;
-            this.state.game.scoresheet.forEach(row => {
-                if (row.team._id == teamID) {
-                    answerSheet.team = {
-                        _id: teamID,
-                        team_name: row.team.team_name
-                    }
-                }
-            })
-        })
+    moveSheet = () => {
+        let newSheet = this.state.game.answer_basket.pop()
+        console.log(newSheet)
+        let teamName = this.state.game.scoresheet.filter(row => { return row.team._id == newSheet.team._id })
+        newSheet.team.team_name = teamName.team_name
+        this.state.game.current_answer = newSheet
         this.setState(this.state)
+        this.saveGame()
     }
-    tickAnswer = (e, basket_idx, answer_idx) => {
+    tickAnswer = (e, answer_idx) => {
         let calculatedScore = 0;
-        this.state.game.answer_basket[basket_idx].answer_sheet.answers[answer_idx].correct = e.target.checked
-        if (this.state.game.answer_basket[basket_idx].answer_sheet.q % 10 == 0) {
-            calculatedScore = (this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].correct ? this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].bid : -1 * (this.state.game.answer_basket[basket_idx].answer_sheet.answers[0].bid / 2))
+        this.state.game.current_answer.answer_sheet.answers[answer_idx].correct = e.target.checked
+        if (this.state.game.current_answer.answer_sheet.q % 10 == 0) {
+            calculatedScore = (this.state.game.current_answer.answer_sheet.answers[0].correct ? this.state.game.current_answer.answer_sheet.answers[0].bid : -1 * (this.state.game.current_answer.answer_sheet.answers[0].bid / 2))
         }
         else {
-            this.state.game.answer_basket[basket_idx].answer_sheet.answers.forEach(answer => {
+            this.state.game.current_answer.answer_sheet.answers.forEach(answer => {
                 calculatedScore += answer.correct ? answer.bid : 0
             })
         }
 
-        this.state.game.answer_basket[basket_idx].answer_sheet.score = calculatedScore
+        this.state.game.current_answer.answer_sheet.score = calculatedScore
         this.setState(this.state)
     }
     changeScore = e => {
         e.preventDefault()
-        this.state.game.answer_basket[e.target.getAttribute("data-basket-idx")].answer_sheet.score = e.target.value
+        this.state.game.current_answer.answer_sheet.score = e.target.value
         this.setState(this.state)
     }
-    scoreAnswer = answer_idx => {
-        let thisTeam = this.state.game.answer_basket[answer_idx].team
-        this.state.game.scoresheet.forEach(row => {
-            if (row.team._id == thisTeam._id) {
-                let thisSheet = this.state.game.answer_basket[answer_idx].answer_sheet
-                thisSheet.status = "scored"
-                let calculatedScore = 0
-                if (thisSheet.q % 10 == 0) {
-                    calculatedScore = (thisSheet.answers[0].correct ? thisSheet.answers[0].bid : -1 * (thisSheet.answers[0].bid / 2))
-                }
-                else {
-                    thisSheet.answers.forEach(answer => {
-                        calculatedScore += answer.correct ? answer.bid : 0
-                    })
-                }
+    scoreAnswer = () => {
+        let thisSheet = this.state.game.current_answer.answer_sheet
+        thisSheet.status = "scored"
+        let calculatedScore = 0
+        if (thisSheet.q % 10 == 0) {
+            calculatedScore = (thisSheet.answers[0].correct ? thisSheet.answers[0].bid : -1 * (thisSheet.answers[0].bid / 2))
+        }
+        else {
+            thisSheet.answers.forEach(answer => {
+                calculatedScore += answer.correct ? answer.bid : 0
+            })
+        }
 
-                if (thisSheet.score != calculatedScore && thisSheet.score != 0) {
-                    thisSheet.status = "override"
-                }
-                else {
-                    thisSheet.score = calculatedScore
-                    thisSheet.status = "scored"
-                }
-                row.scored_sheets.push(thisSheet)
-                this.state.game.answer_basket.splice(answer_idx, 1)
+        if (thisSheet.score != calculatedScore && thisSheet.score != 0) {
+            thisSheet.status = "override"
+        }
+        else {
+            thisSheet.score = calculatedScore
+            thisSheet.status = "scored"
+        }
+        let rowIndex = null;
+        this.state.game.scoresheet.forEach((row, idx) => {
+            if (row.team._id == this.state.game.current_answer.team._id) {
+                rowIndex = idx
             }
         })
+        this.state.game.scoresheet[rowIndex].scored_sheets.push(thisSheet)
+
+        thisSheet.answers.forEach(currentAnswer => {
+            this.state.game.answer_basket.forEach((answer, idx) => {
+                answer.answer_sheet.answers.forEach(a => {
+                    if (answer.answer_sheet.q == thisSheet.q && a.content.toLowerCase() == currentAnswer.content.toLowerCase()) {
+                        a.correct = currentAnswer.correct
+                        if ([5, 15].indexOf(answer.answer_sheet.q) < 0) {
+                            this.state.game.scoresheet.forEach((row, rowIndex) => {
+                                if (row.team._id == answer.team._id) {
+                                    this.state.game.scoresheet[rowIndex].scored_sheets.push(answer.answer_sheet)
+                                    this.state.game.answer_basket.splice(idx, 1)
+                                }
+                            })
+                        }
+                    }
+                })
+            })
+        })
+
+        if (this.state.game.answer_basket.length) {
+            this.state.game.current_answer = this.state.game.answer_basket.pop()
+        }
+        else {
+            this.state.game.current_answer = this.blankAnswer
+        }
         this.setState(this.state)
         this.saveGame()
     }
@@ -398,7 +440,10 @@ class App extends Component {
         })
 
         this.state.game.scoresheet[rowIndex].scored_sheets.splice(qIndex, 1);
-        this.state.game.answer_basket.push({ team: thisTeam, answer_sheet: answerSheet })
+        if (this.state.game.current_answer.answer_sheet.q) {
+            this.state.game.answer_basket.push(this.state.game.current_answer)
+        }
+        this.state.game.current_answer = { team: thisTeam, answer_sheet: answerSheet }
         this.setState(this.state)
         this.saveGame()
     }
@@ -501,14 +546,19 @@ class App extends Component {
         return pug`
             LoginBar(
                 user=this.state.user,
-                logout=this.logout
+                logout=this.logout,
+                adminButtons=this.adminButtons()
             )
+            header.page-header
+                .logo
+                    img(src="/images/logo.png")
+                .site-title
+                    h1 Online Pub Trivia
             AdminNav(
                 mode=this.state.mode,
                 game=this.state.game,
                 changeQuestion=this.changeQuestion,
-                beginGame=this.beginGame,
-                adminButtons=this.adminButtons()
+                beginGame=this.beginGame
             )
             #wrapper 
                 if this.state.mode=="manager"
@@ -545,31 +595,36 @@ class App extends Component {
                             saveGame=this.saveGame
                             )
                     if this.state.mode=="play"
-                        WaitingRoom(
-                            waiting_room=this.state.game.waiting_room,
-                            addTeamToSheet=this.addTeamToSheet,
-                            deleteTeam=this.deleteTeam
-                        )
-                        AnswerBasket(
-                            answers=this.state.game.answer_basket,
-                            scores=this.state.game.scoresheet,
-                            tickAnswer=this.tickAnswer,
-                            scoreAnswer=this.scoreAnswer,
-                            deleteAnswer=this.deleteAnswer,
-                            changeBid=this.changeBid,
-                            changeScore=this.changeScore
-                        )
                         Scoresheet(
                             game=this.state.game,
                             sendToBasket=this.sendToBasket,
                             sendTeamToWaitingRoom=this.sendTeamToWaitingRoom
                         )
-                        ChatBox(
-                            messages=this.state.io,
-                            changeChat=this.changeChat,
-                            sendChat=this.sendChat,
-                            chatkeyDown=this.chatkeyDown
-                        )
+                        .flex
+                            .column.half
+                                AnswerBasket(
+                                    total=this.state.game.answer_basket.length,
+                                    current_sheet=this.state.game.current_answer,
+                                    moveSheet=this.moveSheet,
+                                    scores=this.state.game.scoresheet,
+                                    tickAnswer=this.tickAnswer,
+                                    scoreAnswer=this.scoreAnswer,
+                                    deleteAnswer=this.deleteAnswer,
+                                    changeBid=this.changeBid,
+                                    changeScore=this.changeScore
+                                )                            
+                                WaitingRoom(
+                                    waiting_room=this.state.game.waiting_room,
+                                    addTeamToSheet=this.addTeamToSheet,
+                                    deleteTeam=this.deleteTeam
+                                )
+                            .column.half
+                                ChatBox(
+                                    io=this.state.io,
+                                    changeChat=this.changeChat,
+                                    sendChat=this.sendChat,
+                                    chatkeyDown=this.chatkeyDown
+                                )               
         `
     }
 }

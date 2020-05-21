@@ -9,7 +9,8 @@ module.exports=(action, data, type) => {
         get: rootpath + "get/" + type,
         update: rootpath + "update/" + type,
         updateGame: rootpath + "updategame/",
-        delete: rootpath + "delete/" + type
+        delete: rootpath + "delete/" + type,
+        deleteAnswer: rootpath + "deleteanswer/"
     }
 
     //console.log("API Call: " + paths[action], data, type)

@@ -8,10 +8,12 @@ export default class LoginBar extends Component {
         return pug`
             if this.props.user
                 .login-bar
-                    p="logged in as "
-                        strong=this.props.user.username
-                        a(href="lobby.html") lobby
-                        a(href="#",onClick=this.props.logout) logout
+                    nav
+                        a(href="lobby.html") return to lobby
+                    .status
+                        p="logged in as "
+                            strong=this.props.user.username
+                            a(href="#",onClick=this.props.logout) logout
         `
     }
 }

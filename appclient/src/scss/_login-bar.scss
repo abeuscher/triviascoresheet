@@ -1,14 +1,34 @@
 .login-bar {
-    background:$blue;
+    background:$black;
     color:$white;
-    text-align:right;
     padding:.1em 1em;
     font-size:.8em;
     line-height:.9;
+    display:flex;
+
+    nav {
+        flex-basis:50%;
+        display:flex;
+        align-items:center;
+        a {
+            font-size:1em;
+            text-align:center;
+            display:inline-block;
+            text-transform:uppercase;
+        }
+    }
+    .status {
+        text-align:right;
+        flex-basis:50%;
+        a {
+            margin-left:.5em;
+            margin-right:0;
+        }
+    }
     a {
         color:$gray;
-        margin-left:.5em;
-        padding:.2em .5em;
+        margin-right:.5em;
+        padding:.5em;
         background:darken($orange,10%);
         
         @include nice-transition();

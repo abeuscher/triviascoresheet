@@ -9,6 +9,7 @@ module.exports = (app, models, corsOptions) => {
                 let thisGame = await thisGameModel.findById(request.body.id)
                     .populate({ path: "waiting_room", populate: { path: "team" } })
                     .populate("answer_basket.team")
+                    .populate("current_answer.team")
                     .populate("scoresheet.team")
                     .exec();
                 response.send(thisGame ? thisGame : { error: "not found" });
@@ -22,6 +23,7 @@ module.exports = (app, models, corsOptions) => {
                 let result = await thisGameModel.find()
                     .populate({ path: "waiting_room", populate: { path: "team" } })
                     .populate("answer_basket.team")
+                    .populate("current_answer.team")
                     .populate("scoresheet.team")
                     .exec();
                 response.json(result)

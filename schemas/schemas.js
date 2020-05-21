@@ -100,8 +100,8 @@ function AppSchemas() {
                         default: "unsubmitted"
                     },
                     score: {
-                        type:Number,
-                        default:0
+                        type: Number,
+                        default: 0
                     },
                     answers: [{
                         content: {
@@ -135,8 +135,8 @@ function AppSchemas() {
                         default: "unsubmitted"
                     },
                     score: {
-                        type:Number,
-                        default:0
+                        type: Number,
+                        default: 0
                     },
                     answers: [{
                         content: {
@@ -156,6 +156,41 @@ function AppSchemas() {
                     }
                 }
             }],
+            current_answer: {
+                team: {
+                    ref: "team",
+                    type: mongoose.Schema.Types.ObjectId
+                },
+                answer_sheet: {
+                    q: {
+                        type: Number
+                    },
+                    status: {
+                        type: String,
+                        default: "unsubmitted"
+                    },
+                    score: {
+                        type: Number,
+                        default: 0
+                    },
+                    answers: [{
+                        content: {
+                            type: String
+                        },
+                        bid: {
+                            type: Number
+                        },
+                        correct: {
+                            type: Boolean,
+                            default: false
+                        }
+                    }],
+                    created: {
+                        type: Date,
+                        default: Date.now
+                    }
+                }
+            },
             created: {
                 type: Date,
                 default: Date.now

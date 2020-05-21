@@ -94,11 +94,15 @@ class App extends Component {
     render() {
 
         return pug`
-            .black-wrapper
                 LoginBar(
                     user=this.state.user,
                     logout=this.logout
                 )
+                header.page-header
+                    .logo
+                        img(src="/images/logo.png")
+                    .site-title
+                        h1 Online Pub Trivia
                 .lobby
                     #bg.bg
                     .content

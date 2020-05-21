@@ -8,22 +8,6 @@ export default class AnswerForm extends Component {
     render() {
         return pug`
         - let game = this.props.game
-        .answer-form.answer-header
-            h2=game.game_title
-            h3="Playing as: "
-                span.team.white=this.props.team.team_name
-            if game.current_question==0
-                p="Starts: " + ConvertDate(game.start_time)
-            else if game.current_question==20
-                h3
-                    span.white Game Completed.
-            else
-                h3="Current Question: "
-                    span.white=game.current_question
-        .answer-description
-            input(type="checkbox",name="info-toggle",id="info-toggle")
-            label(for="info-toggle") Game Info:
-            .content(dangerouslySetInnerHTML={__html:this.props.game.game_description})
         .answer-form
             if this.props.mode=="waiting_room"
                 h3 You are in the waiting room. Please wait for the host to add you to the game.

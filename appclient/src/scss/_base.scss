@@ -4,7 +4,7 @@ body {
   background: $body-bg-color;
   color: $body-text-color;
   position: relative;
-  min-height:100vh;
+  min-height: 100vh;
 }
 a {
   text-decoration: none;
@@ -22,43 +22,83 @@ h5,
 h6 {
   font-family: $header-font;
 }
-#admin-app, #player-app, #login-app, #lobby-app, .page-header, .page-footer, #audio-app {
-  width:95%;
-  max-width:1200px;
-  margin:0 auto;
+.max-width {
+  width: 95%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 #wrapper {
-  background:$off-white;
+  background: $off-white;
 }
 .black-wrapper {
-  background:$black;
+  background: $black;
 }
 .flex {
-  display:flex;
-  flex-wrap:wrap;
+  display: flex;
+  flex-wrap: wrap;
   &.nowrap {
-    flex-wrap:nowrap;
+    flex-wrap: nowrap;
   }
   .column {
-    flex-basis:100%;
+    flex-basis: 100%;
     @include bp(m) {
       &.half {
-        flex-basis:50%;
+        flex-basis: 50%;
       }
       &.quarter {
-        flex-basis:25%;
+        flex-basis: 25%;
       }
       &.three-quarter {
-        flex-basis:75%;
+        flex-basis: 75%;
       }
       &.fifth {
-        flex-basis:20%;
+        flex-basis: 20%;
       }
       &.two-fifth {
-        flex-basis:40%;
+        flex-basis: 40%;
       }
       &.three-fifth {
-        flex-basis:60%;
+        flex-basis: 60%;
+      }
+    }
+  }
+}
+
+.game-header {
+  background: $black;
+  color: $white;
+  text-align: center;
+
+  display: flex;
+  .details,
+  .description {
+    padding: $gutter-width/2;
+  }
+  .details {
+    h2,h3 {
+      font-weight:normal;
+      margin:0 0 .5em;
+    }
+    
+  }
+  .description-bucket {
+    background: darken($blue, 10%);
+    h2 {
+      font-size:.9em;
+      text-transform:uppercase;
+      font-weight:normal;
+      color:lighten($blue,50%);
+    }
+  }
+  .description {
+    flex-basis: 100%;
+    padding: 0 1em;
+    color:lighten($blue,50%);
+    a {
+      color:$white;
+      text-decoration: none;
+      &:hover {
+        text-decoration:underline;
       }
     }
   }

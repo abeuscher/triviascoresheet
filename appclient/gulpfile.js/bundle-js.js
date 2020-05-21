@@ -85,7 +85,7 @@ function bundleFile(f) {
           console.log("Finished Processing JS File " + f.name)
 
           if (!devFlag) {
-            minifyJS(f)
+           // minifyJS(f)
           }
         })
     );

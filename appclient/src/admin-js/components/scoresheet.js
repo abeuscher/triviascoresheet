@@ -9,9 +9,7 @@ export default class Scoresheet extends Component {
         const scoreUpdateMap = [5,10,15,20,this.props.game.num_questions-1]
         const theCount = Array.apply(null, Array(this.props.game.num_questions)), total=0
         return pug`
-        .scoresheet
-            .padded-column.section-title
-                h2 Scoresheet        
+        .scoresheet    
             .scoresheet-header.flex
                 .team-column
                     h2 Team Name

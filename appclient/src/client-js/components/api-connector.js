@@ -10,6 +10,7 @@ module.exports=(action, data, type) => {
         create: rootpath + "create/" + type,
         read: rootpath + "clientgame/",
         update: rootpath + "update/" + type,
+        getTeam:rootpath + "get/team",
         delete: rootpath + "delete/" + type
     }
 

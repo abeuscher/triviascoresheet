@@ -28,7 +28,7 @@ module.exports = (app, models, corsOptions) => {
                     let thisRow = result.scoresheet.filter(row => {
                         return row.team._id == request.body.teamid
                     })                    
-                    if (matchFound) {
+                    if (matchFound && [5,15].indexOf(request.body.answer_sheet.q)<0) {
                         request.body.answer_sheet.status = "scored"
                         result.scoresheet.forEach((row,idx)=>{
                             if (row.team==request.body.teamid) {
@@ -38,8 +38,15 @@ module.exports = (app, models, corsOptions) => {
                         result.save()
                     }
                     else {
-                        request.body.answer_sheet.status = "answer_basket"
-                        result.answer_basket.push({ team: request.body.teamid, answer_sheet: request.body.answer_sheet })
+                        if (result.current_answer.answer_sheet.q == null) {
+                            request.body.answer_sheet.status = "current"
+                            result.current_answer = { team: request.body.teamid, answer_sheet: request.body.answer_sheet }
+                        }
+                        else {
+                            request.body.answer_sheet.status = "answer_basket"
+                            result.answer_basket.push({ team: request.body.teamid, answer_sheet: request.body.answer_sheet })
+                        }
+                        
                         result.save()
                     }
                     response.json({ msg: "success", data: thisRow })
