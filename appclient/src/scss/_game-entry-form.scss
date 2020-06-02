@@ -1,19 +1,35 @@
 .game-entry-form {
     label {
-        display:block;
-        text-transform:uppercase;
-        font-size:.8em;
+        display: block;
+        text-transform: uppercase;
+        font-size: 0.8em;
     }
-    input, select, .react-datepicker-wrapper {
-        width:100%;
-        margin-bottom:$gutter-width;
+    input,
+    select,
+    .react-datepicker-wrapper {
+        width: 100%;
+        margin-bottom: $gutter-width;
+    }
+    .column.half {
+        input,
+        select,
+        .react-datepicker-wrapper {
+            width: 80%;
+        }
     }
     .react-datepicker-wrapper {
         input {
-            margin:0;
+            margin: 0;
         }
     }
     .react-datepicker-popper {
-        z-index:999;
+        z-index: 999;
+    }
+    button,
+    a.button {
+        margin-top: 1em;
+    }
+    &.status {
+        min-height: $gutter-width;
     }
 }

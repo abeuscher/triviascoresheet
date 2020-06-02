@@ -69,7 +69,7 @@ function bundleFile(f) {
         }
       ], "@babel/preset-react"], plugins: [require("babel-plugin-transform-react-pug"), require("@babel/plugin-proposal-class-properties")]
     })
-    .transform("uglifyify", { global: true })
+    //.transform("uglifyify", { global: true })
     .bundle()
     .on('error', function (err) {
 

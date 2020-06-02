@@ -26,15 +26,15 @@
         }
     }
     a {
-        color:$gray;
+        
         margin-right:.5em;
         padding:.5em;
-        background:darken($orange,10%);
-        
+        color:$white;
+        background:$orange;
         @include nice-transition();
         &:hover {
-            background:$orange;
-            color:$white;
+            background:darken($orange,10%);
+            color:$gray;
         }
     }
 }

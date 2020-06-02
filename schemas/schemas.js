@@ -64,10 +64,6 @@ function AppSchemas() {
                 max: 20,
                 default: 0
             },
-            game_code: {
-                type: String,
-                unique: true
-            },
             game_over: {
                 type: Boolean,
                 default: false
